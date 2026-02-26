@@ -19,6 +19,12 @@ export function useLive(options: UseLiveOptions = {}) {
     const unsubState = liveService.onStateChange(setState)
     const unsubEvent = liveService.onEvent((event) => {
       optionsRef.current.onTranscriptEvent?.(event)
+
+      if (event.type === 'fallback') {
+        const payload = event.payload as { active?: boolean }
+        setIsFallback(Boolean(payload.active))
+      }
+
       if (event.type === 'error') {
         const payload = event.payload as { message?: string }
         optionsRef.current.onError?.(payload.message ?? 'Live session error')
@@ -32,10 +38,9 @@ export function useLive(options: UseLiveOptions = {}) {
 
   const connect = useCallback(async (config: LiveSessionConfig) => {
     configRef.current = config
-    const relayUrl = import.meta.env.VITE_LIVE_RELAY_URL
-    setIsFallback(!relayUrl)
     try {
       await liveService.connect(config)
+      setIsFallback(liveService.isUsingFallback())
     } catch (err) {
       optionsRef.current.onError?.(err instanceof Error ? err.message : 'Failed to connect')
     }
@@ -52,12 +57,9 @@ export function useLive(options: UseLiveOptions = {}) {
     if (state === 'idle' || state === 'disconnected') return
     setIsMicActive(prev => !prev)
     // TODO [Phase 2]: start/stop sending audio chunks to relay
-    // if (isMicActive) stopMicCapture() else startMicCapture()
   }, [state])
 
   // TODO [Phase 2]: Holy Pause behavior
-  // When enabled: introduce silence threshold before Eliana responds
-  // Timing and sensitivity tuned to user preferences
   const triggerHolyPause = useCallback(() => {
     // Placeholder — state goes to 'paused' briefly then resumes
   }, [])

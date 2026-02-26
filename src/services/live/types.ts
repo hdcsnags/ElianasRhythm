@@ -18,7 +18,19 @@ export interface LiveSessionConfig {
 }
 
 export interface LiveStreamEvent {
-  type: 'transcript_partial' | 'transcript_final' | 'assistant_start' | 'assistant_chunk' | 'assistant_end' | 'vad_speech_start' | 'vad_speech_end' | 'interruption' | 'error' | 'session_end'
+  type:
+    | 'session_ready'
+    | 'fallback'
+    | 'transcript_partial'
+    | 'transcript_final'
+    | 'assistant_start'
+    | 'assistant_chunk'
+    | 'assistant_end'
+    | 'vad_speech_start'
+    | 'vad_speech_end'
+    | 'interruption'
+    | 'error'
+    | 'session_end'
   payload: unknown
   timestamp: number
 }
@@ -47,6 +59,12 @@ export interface ErrorEvent {
   timestamp: number
 }
 
+export interface FallbackEvent {
+  type: 'fallback'
+  payload: { active: boolean; reason?: string }
+  timestamp: number
+}
+
 // TODO [Phase 2]: Interruption / VAD logic
 // When VAD detects speech while assistant is speaking, emit interruption event
 // Frontend should pause playback and resume listening
@@ -60,6 +78,8 @@ export interface LiveService {
   connect(config: LiveSessionConfig): Promise<void>
   disconnect(): void
   sendAudioChunk(chunk: ArrayBuffer): void
+  /** True when the client is running in fallback mode (no relay or relay unavailable). */
+  isUsingFallback(): boolean
   onStateChange(cb: (state: LiveSessionState) => void): () => void
   onEvent(cb: (event: LiveStreamEvent) => void): () => void
 }

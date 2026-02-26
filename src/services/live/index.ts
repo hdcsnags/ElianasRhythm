@@ -1,8 +1,6 @@
-// TODO [Phase 2]: Replace stubs with real WebSocket relay connection
-// Architecture: browser WebSocket → Edge Function / Cloud Run relay → Live Provider WebSocket
-//
-// Security note: Provider API keys MUST remain server-side only.
-// This service connects to the RELAY, not directly to the provider.
+// Eliana Live Service — Phase 2
+// Architecture: browser WebSocket → Cloud Run relay → Gemini Live WS
+// Provider API keys stay server-side only.
 
 import type {
   LiveService,
@@ -11,6 +9,7 @@ import type {
   LiveStreamEvent,
 } from './types'
 
+import { MicPipeline, PlaybackQueue } from './audioPipeline'
 import { supabase } from '../../lib/supabase/client'
 
 const RELAY_URL = import.meta.env.VITE_LIVE_RELAY_URL ?? ''
@@ -24,7 +23,9 @@ class LiveServiceImpl implements LiveService {
   private stateListeners: StateListener[] = []
   private eventListeners: EventListener[] = []
   private currentState: LiveSessionState = 'idle'
-  private mockTimer: ReturnType<typeof setTimeout> | null = null
+  private mic: MicPipeline | null = null
+  private playback: PlaybackQueue | null = null
+  private micStarted = false
 
   private setState(state: LiveSessionState) {
     this.currentState = state
@@ -39,41 +40,32 @@ class LiveServiceImpl implements LiveService {
     this.setState('connecting')
     this.usingFallback = false
 
-    // 1) Obtain a short-lived relay token (server-side issuer) to avoid exposing provider keys in the browser.
-    //    This token is validated by the relay (Phase 2), and can later be swapped for provider ephemeral tokens.
     let relayToken = ''
-    let relayBaseUrl = (RELAY_URL ?? '').trim()
+    let relayBaseUrl = RELAY_URL.trim()
 
     try {
       const { data: { session } } = await supabase.auth.getSession()
       const accessToken = session?.access_token
-      if (!accessToken) {
-        throw new Error('Not authenticated')
-      }
+      if (!accessToken) throw new Error('Not authenticated')
 
       const { data, error } = await supabase.functions.invoke('relay-live-token', {
         body: { sessionId: config.sessionId, mode: config.mode },
         headers: { Authorization: `Bearer ${accessToken}` },
       })
 
-      if (error) {
-        throw new Error(error.message)
-      }
+      if (error) throw new Error(error.message)
 
-      relayToken = (data as any)?.token ?? ''
-      const providedRelayUrl = (data as any)?.relayUrl ?? ''
-      if (!relayBaseUrl && typeof providedRelayUrl === 'string') {
-        relayBaseUrl = providedRelayUrl
-      }
+      relayToken = (data as { token?: string })?.token ?? ''
+      const providedUrl = (data as { relayUrl?: string })?.relayUrl ?? ''
+      if (!relayBaseUrl && providedUrl) relayBaseUrl = providedUrl
     } catch (err) {
-      console.warn('[LiveService] Failed to get relay token — falling back', err)
+      console.warn('[LiveService] Token fetch failed — falling back', err)
       this.usingFallback = true
       this.emit({ type: 'fallback', payload: { active: true, reason: 'token_unavailable' }, timestamp: Date.now() })
       await this.runFallback(config, 'token_unavailable')
       return
     }
 
-    // 2) If relay URL is not configured, use fallback.
     if (!relayBaseUrl) {
       console.warn('[LiveService] Relay URL not configured — using fallback')
       this.usingFallback = true
@@ -82,24 +74,25 @@ class LiveServiceImpl implements LiveService {
       return
     }
 
-    // 3) Connect to relay via WebSocket.
     try {
-      const trimmed = relayBaseUrl.replace(/\/$/, '')
-      const wsUrl = `${trimmed}/live?sessionId=${encodeURIComponent(config.sessionId)}&mode=${encodeURIComponent(config.mode)}&token=${encodeURIComponent(relayToken)}`
+      const base = relayBaseUrl.replace(/\/$/, '')
+      const wsUrl = `${base}/live?sessionId=${encodeURIComponent(config.sessionId)}&mode=${encodeURIComponent(config.mode)}&token=${encodeURIComponent(relayToken)}`
       this.ws = new WebSocket(wsUrl)
 
       this.ws.onopen = () => {
-        this.setState('listening')
-        this.emit({ type: 'fallback', payload: { active: false }, timestamp: Date.now() })
-        this.ws?.send(JSON.stringify({ type: 'session_start', payload: config }))
+        this.ws?.send(JSON.stringify({
+          type: 'session_start',
+          sessionId: config.sessionId,
+          mode: config.mode,
+          userId: config.userId,
+        }))
       }
 
       this.ws.onmessage = (evt) => {
         try {
-          const event = JSON.parse(evt.data as string) as any as LiveStreamEvent
-          this.handleIncomingEvent(event)
+          this.handleRelayEvent(JSON.parse(evt.data as string) as Record<string, unknown>)
         } catch {
-          console.error('[LiveService] Failed to parse WS message', evt.data)
+          console.error('[LiveService] WS parse error', evt.data)
         }
       }
 
@@ -108,10 +101,10 @@ class LiveServiceImpl implements LiveService {
         this.emit({ type: 'error', payload: { code: 'WS_ERROR', message: 'WebSocket connection error' }, timestamp: Date.now() })
       }
 
-      this.ws.onclose = async () => {
-        if (this.currentState !== 'error') {
-          this.setState('disconnected')
-        }
+      this.ws.onclose = () => {
+        if (this.currentState !== 'error') this.setState('disconnected')
+        this.stopMic()
+        this.playback?.stop()
       }
     } catch (err) {
       console.error('[LiveService] Connection failed', err)
@@ -122,30 +115,100 @@ class LiveServiceImpl implements LiveService {
     }
   }
 
-  private handleIncomingEvent(event: LiveStreamEvent) {
-    // TODO [Phase 2]: Handle VAD, interruption, audio playback events
-    switch (event.type) {
-      case 'assistant_start':
-        this.setState('speaking')
+  private handleRelayEvent(msg: Record<string, unknown>) {
+    const type = msg.type as string
+
+    switch (type) {
+      case 'ready':
+        this.setState('listening')
+        this.emit({ type: 'fallback', payload: { active: false }, timestamp: Date.now() })
+        this.startMicAndPlayback()
         break
-      case 'assistant_end':
+
+      case 'audio': {
+        const audio = msg.audio as string | undefined
+        if (audio) {
+          if (this.currentState !== 'speaking') this.setState('speaking')
+          this.playback?.enqueue(audio)
+        }
+        break
+      }
+
+      case 'transcript':
+        if (msg.final) {
+          this.emit({
+            type: 'transcript_final',
+            payload: { text: msg.text ?? '', speaker: msg.speaker ?? 'assistant' },
+            timestamp: Date.now(),
+          })
+        } else {
+          this.emit({
+            type: 'transcript_partial',
+            payload: { text: msg.text ?? '', speaker: msg.speaker ?? 'assistant' },
+            timestamp: Date.now(),
+          })
+        }
+        break
+
+      case 'turn_complete':
         this.setState('listening')
         break
-      case 'interruption':
+
+      case 'interrupted':
+        this.playback?.interrupt()
         this.setState('listening')
+        this.emit({ type: 'interruption', payload: { at_ms: Date.now() }, timestamp: Date.now() })
         break
+
+      case 'error': {
+        const code = msg.code as string
+        if (code === 'NO_PROVIDER') {
+          this.emit({ type: 'fallback', payload: { active: true, reason: 'no_provider' }, timestamp: Date.now() })
+          this.usingFallback = true
+        } else {
+          this.setState('error')
+        }
+        this.emit({ type: 'error', payload: { code, message: msg.message ?? 'Relay error' }, timestamp: Date.now() })
+        break
+      }
+
       case 'session_end':
         this.setState('disconnected')
         break
-      case 'error':
-        this.setState('error')
-        break
     }
-    this.emit(event)
   }
 
-  // Fallback: calls server-side Edge Function for a graceful response
-  // This is NOT a substitute for the live path — it is for graceful degradation only.
+  private async startMicAndPlayback() {
+    this.playback = new PlaybackQueue()
+    this.playback.start()
+
+    this.mic = new MicPipeline((base64) => {
+      if (this.ws?.readyState === WebSocket.OPEN) {
+        this.ws.send(JSON.stringify({
+          type: 'audio',
+          audio: base64,
+          mimeType: 'audio/pcm;rate=16000',
+        }))
+      }
+    })
+
+    try {
+      await this.mic.start()
+      this.micStarted = true
+    } catch (err) {
+      console.error('[LiveService] Mic start failed', err)
+      this.emit({ type: 'error', payload: { code: 'MIC_ERROR', message: 'Microphone access denied or failed' }, timestamp: Date.now() })
+    }
+  }
+
+  private stopMic() {
+    if (this.mic) {
+      this.mic.stop()
+      this.mic = null
+    }
+    this.micStarted = false
+  }
+
   private async runFallback(config: LiveSessionConfig, reason?: string) {
     try {
       const { data: { session } } = await supabase.auth.getSession()
@@ -158,14 +221,14 @@ class LiveServiceImpl implements LiveService {
       })
       if (error) throw new Error(error.message)
 
-      const text = (data as any)?.text ?? (data as any)?.response ?? (data as any)?.message ?? "Peace be with you. I'm here and listening."
+      const text = (data as { text?: string; response?: string; message?: string })?.text
+        ?? (data as { text?: string; response?: string; message?: string })?.response
+        ?? (data as { text?: string; response?: string; message?: string })?.message
+        ?? "Peace be with you. I'm here and listening."
+
       this.setState('listening')
       this.setState('speaking')
-      this.emit({
-        type: 'transcript_final',
-        payload: { text, speaker: 'assistant' },
-        timestamp: Date.now(),
-      })
+      this.emit({ type: 'transcript_final', payload: { text, speaker: 'assistant' }, timestamp: Date.now() })
       setTimeout(() => {
         if (this.currentState !== 'error') this.setState('listening')
       }, 800)
@@ -177,23 +240,34 @@ class LiveServiceImpl implements LiveService {
   }
 
   disconnect(): void {
-    if (this.mockTimer) {
-      clearTimeout(this.mockTimer)
-      this.mockTimer = null
-    }
+    this.stopMic()
+    this.playback?.stop()
+    this.playback = null
     if (this.ws) {
       this.ws.onclose = null
+      try { this.ws.send(JSON.stringify({ type: 'session_end' })) } catch { /* ignore */ }
       this.ws.close()
       this.ws = null
     }
     this.setState('disconnected')
   }
 
-  // TODO [Phase 2]: Stream mic audio chunks to relay
   sendAudioChunk(chunk: ArrayBuffer): void {
     if (this.ws?.readyState === WebSocket.OPEN) {
       this.ws.send(chunk)
     }
+  }
+
+  sendInterrupt(): void {
+    if (this.ws?.readyState === WebSocket.OPEN) {
+      this.ws.send(JSON.stringify({ type: 'interrupt' }))
+    }
+    this.playback?.interrupt()
+    this.setState('listening')
+  }
+
+  isMicStarted(): boolean {
+    return this.micStarted
   }
 
   isUsingFallback(): boolean {
@@ -216,5 +290,5 @@ class LiveServiceImpl implements LiveService {
   }
 }
 
-export const liveService: LiveService = new LiveServiceImpl()
+export const liveService = new LiveServiceImpl()
 export type { LiveSessionState, LiveStreamEvent, LiveSessionConfig }

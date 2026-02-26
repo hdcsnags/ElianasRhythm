@@ -39,8 +39,9 @@ createRelayServer(wss)
 server.listen(PORT, () => {
   console.log(`[relay] Eliana relay server listening on port ${PORT}`)
   console.log(`[relay] WebSocket path: /live`)
-  console.log(`[relay] Phase 1 — mock response mode active`)
-  // TODO [Phase 2]: Log provider connection status on startup
+  console.log(`[relay] Phase 2 — Gemini Live relay active`)
+  const hasKey = Boolean(process.env.LIVE_PROVIDER_API_KEY)
+  console.log(`[relay] Provider API key: ${hasKey ? 'configured' : 'NOT SET — demo mode only'}`)
 })
 
 process.on('SIGTERM', () => {

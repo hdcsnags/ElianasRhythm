@@ -1,48 +1,219 @@
-// Eliana Live Session Relay
-// Phase 1: WebSocket scaffold with mock response loop.
-// Phase 2: Wire to live provider (e.g., Gemini Live API).
-//
-// Architecture:
-//   Browser WebSocket → this relay → Live Provider WebSocket
-//
-// SECURITY: LIVE_PROVIDER_API_KEY stays server-side here. Never forwarded to client.
+// Eliana Live Session Relay — Phase 2
+// Architecture: Browser WS ↔ this relay ↔ Gemini Live WS
+// Provider API keys stay server-side only, never forwarded to clients.
 
 import { WebSocket, WebSocketServer } from 'ws'
 import type { IncomingMessage } from 'http'
-import type { ClientConnection, RelayMessage } from './types.js'
+import { readFileSync } from 'fs'
+import { join, dirname } from 'path'
+import { fileURLToPath } from 'url'
+import type { ClientConnection, RelayToClientMessage, BrowserMessage } from './types.js'
 
-const MOCK_RESPONSES_BY_MODE: Record<string, string[]> = {
-  companion: [
-    "Peace be with you. I'm here and listening.",
-    "I hear you. Let's sit with that together.",
-    "Your words are received with care.",
-  ],
-  bridge: [
-    "I'm bridging this conversation with care.",
-  ],
-  tutor: [
-    "Let's explore this passage together.",
-  ],
+const __dirname = dirname(fileURLToPath(import.meta.url))
+
+const PROVIDER_API_KEY = process.env.LIVE_PROVIDER_API_KEY ?? ''
+const PROVIDER_WS_URL =
+  process.env.LIVE_PROVIDER_WS_URL ??
+  'wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1alpha.GenerativeService.BidiGenerateContent'
+const SUPABASE_URL = process.env.SUPABASE_URL ?? ''
+const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY ?? ''
+
+function loadPrompt(mode: string): string {
+  try {
+    const promptPath = join(__dirname, '..', 'prompts', `${mode}.txt`)
+    return readFileSync(promptPath, 'utf-8').trim()
+  } catch {
+    return "You are Eliana, a calm and compassionate spiritual companion. Listen deeply and respond with warmth."
+  }
 }
 
-function pickMockResponse(mode: string): string {
-  const pool = MOCK_RESPONSES_BY_MODE[mode] ?? MOCK_RESPONSES_BY_MODE.companion
-  return pool[Math.floor(Math.random() * pool.length)]
-}
-
-function send(ws: WebSocket, msg: RelayMessage) {
+function sendToClient(ws: WebSocket, msg: RelayToClientMessage) {
   if (ws.readyState === WebSocket.OPEN) {
     ws.send(JSON.stringify(msg))
   }
 }
 
+async function verifyToken(token: string, sessionId: string): Promise<{ userId: string } | null> {
+  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) return null
+  try {
+    const res = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        apikey: SUPABASE_ANON_KEY,
+      },
+    })
+    if (!res.ok) return null
+    const user = await res.json() as { id?: string }
+    if (!user?.id) return null
+
+    const sessRes = await fetch(
+      `${SUPABASE_URL}/rest/v1/sessions?id=eq.${encodeURIComponent(sessionId)}&user_id=eq.${encodeURIComponent(user.id)}&select=id`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          apikey: SUPABASE_ANON_KEY,
+          Accept: 'application/json',
+        },
+      }
+    )
+    if (!sessRes.ok) return null
+    const sessions = await sessRes.json() as unknown[]
+    if (!Array.isArray(sessions) || sessions.length === 0) return null
+
+    return { userId: user.id }
+  } catch {
+    return null
+  }
+}
+
+function buildGeminiSetupMessage(mode: string, systemPrompt: string) {
+  return {
+    setup: {
+      model: 'models/gemini-2.0-flash-live-001',
+      generation_config: {
+        response_modalities: ['AUDIO', 'TEXT'],
+        speech_config: {
+          voice_config: {
+            prebuilt_voice_config: { voice_name: 'Aoede' },
+          },
+        },
+      },
+      system_instruction: {
+        parts: [{ text: systemPrompt }],
+      },
+      tools: [],
+    },
+  }
+}
+
+function connectToGemini(
+  conn: ClientConnection,
+  clientWs: WebSocket,
+  mode: string,
+  systemPrompt: string
+): WebSocket | null {
+  if (!PROVIDER_API_KEY) {
+    console.warn('[relay] LIVE_PROVIDER_API_KEY not set — Gemini connection skipped')
+    return null
+  }
+
+  const url = `${PROVIDER_WS_URL}?key=${PROVIDER_API_KEY}`
+
+  let providerWs: WebSocket
+  try {
+    providerWs = new WebSocket(url)
+  } catch (err) {
+    console.error('[relay] Failed to create Gemini WebSocket', err)
+    return null
+  }
+
+  providerWs.on('open', () => {
+    console.log(`[relay] Gemini WS open — session=${conn.sessionId}`)
+    providerWs.send(JSON.stringify(buildGeminiSetupMessage(mode, systemPrompt)))
+  })
+
+  let assistantAudioActive = false
+
+  providerWs.on('message', (raw) => {
+    try {
+      const msg = JSON.parse(raw.toString()) as Record<string, unknown>
+
+      if (msg.setupComplete) {
+        sendToClient(clientWs, { type: 'ready' })
+        return
+      }
+
+      if (msg.serverContent) {
+        const sc = msg.serverContent as Record<string, unknown>
+
+        const parts = (sc.modelTurn as Record<string, unknown> | undefined)?.parts
+        if (Array.isArray(parts)) {
+          for (const part of parts as Record<string, unknown>[]) {
+            if (part.text && typeof part.text === 'string') {
+              sendToClient(clientWs, {
+                type: 'transcript',
+                text: part.text,
+                final: false,
+                speaker: 'assistant',
+              })
+            }
+            if (part.inlineData) {
+              const d = part.inlineData as Record<string, string>
+              if (!assistantAudioActive) {
+                assistantAudioActive = true
+              }
+              sendToClient(clientWs, {
+                type: 'audio',
+                audio: d.data,
+                mimeType: 'audio/pcm;rate=24000',
+              })
+            }
+          }
+        }
+
+        if (sc.turnComplete === true) {
+          if (assistantAudioActive) {
+            assistantAudioActive = false
+          }
+          sendToClient(clientWs, { type: 'turn_complete' })
+        }
+
+        if (sc.interrupted === true) {
+          assistantAudioActive = false
+          sendToClient(clientWs, { type: 'interrupted' })
+        }
+
+        const inputTranscription = sc.inputTranscription as Record<string, unknown> | undefined
+        if (inputTranscription?.text) {
+          sendToClient(clientWs, {
+            type: 'transcript',
+            text: inputTranscription.text as string,
+            final: Boolean((inputTranscription as Record<string, unknown>).isFinal),
+            speaker: 'user',
+          })
+        }
+
+        const outputTranscription = sc.outputTranscription as Record<string, unknown> | undefined
+        if (outputTranscription?.text) {
+          sendToClient(clientWs, {
+            type: 'transcript',
+            text: outputTranscription.text as string,
+            final: Boolean((outputTranscription as Record<string, unknown>).isFinal),
+            speaker: 'assistant',
+          })
+        }
+      }
+    } catch (err) {
+      console.error('[relay] Error parsing Gemini message', err)
+    }
+  })
+
+  providerWs.on('error', (err) => {
+    console.error(`[relay] Gemini WS error — session=${conn.sessionId}`, err)
+    sendToClient(clientWs, {
+      type: 'error',
+      code: 'PROVIDER_ERROR',
+      message: 'Provider connection error',
+    })
+  })
+
+  providerWs.on('close', (code) => {
+    console.log(`[relay] Gemini WS closed — session=${conn.sessionId} code=${code}`)
+    if (clientWs.readyState === WebSocket.OPEN) {
+      sendToClient(clientWs, { type: 'error', code: 'PROVIDER_CLOSED', message: 'Provider disconnected' })
+    }
+  })
+
+  return providerWs
+}
+
 export function createRelayServer(wss: WebSocketServer) {
   const connections = new Map<string, ClientConnection>()
 
-  wss.on('connection', (clientWs: WebSocket, req: IncomingMessage) => {
-    const url = new URL(req.url ?? '/', `http://${req.headers.host}`)
+  wss.on('connection', async (clientWs: WebSocket, req: IncomingMessage) => {
+    const url = new URL(req.url ?? '/', `http://${req.headers.host ?? 'localhost'}`)
     const sessionId = url.searchParams.get('sessionId')
-    const mode = url.searchParams.get('mode') ?? 'companion'
+    const mode = (url.searchParams.get('mode') ?? 'companion') as 'companion' | 'bridge' | 'tutor'
     const token = url.searchParams.get('token') ?? ''
 
     if (!sessionId) {
@@ -50,82 +221,93 @@ export function createRelayServer(wss: WebSocketServer) {
       return
     }
 
-    // TODO [Phase 2]: Validate relay token (issued by relay-live-token Edge Function)
-    // TODO [Phase 2]: Check token TTL and session binding
-    void token
+    if (!token) {
+      clientWs.close(1008, 'Missing token')
+      return
+    }
+
+    const auth = await verifyToken(token, sessionId)
+    if (!auth) {
+      clientWs.close(1008, 'Unauthorized')
+      return
+    }
 
     const conn: ClientConnection = {
       sessionId,
-      userId: 'pending-auth', // TODO [Phase 2]: Extract from validated token
+      userId: auth.userId,
       mode,
       socket: clientWs,
       connectedAt: new Date(),
+      isSpeaking: false,
     }
     connections.set(sessionId, conn)
+    console.log(`[relay] Connected: session=${sessionId} mode=${mode} user=${auth.userId}`)
 
-    console.log(`[relay] Connected: session=${sessionId} mode=${mode}`)
-
-    send(clientWs, {
-      type: 'session_ready',
-      payload: { sessionId, mode, phase: 1 },
-      timestamp: Date.now(),
-    })
-
-    // TODO [Phase 2]: Open provider WebSocket here
-    // const providerWs = new WebSocket(PROVIDER_WS_URL, { headers: { Authorization: `Bearer ${LIVE_PROVIDER_API_KEY}` } })
-    // conn.providerSocket = providerWs
-    // Forward events bidirectionally
-
-    // Phase 1: Simulated response loop for demo resilience
-    runMockResponseLoop(clientWs, mode)
+    const systemPrompt = loadPrompt(mode)
+    const providerWs = connectToGemini(conn, clientWs, mode, systemPrompt)
+    if (providerWs) {
+      conn.providerSocket = providerWs
+    } else {
+      sendToClient(clientWs, { type: 'ready' })
+      sendToClient(clientWs, {
+        type: 'error',
+        code: 'NO_PROVIDER',
+        message: 'Live provider not configured — relay in demo mode',
+      })
+    }
 
     clientWs.on('message', (data) => {
-      if (Buffer.isBuffer(data)) {
-        // Audio chunk — TODO [Phase 2]: forward to provider WebSocket
-        return
-      }
       try {
-        const msg = JSON.parse(data.toString()) as RelayMessage
-        console.log(`[relay] Client msg: type=${msg.type} session=${sessionId}`)
-        // TODO [Phase 2]: Route session_start config to provider
-        // TODO [Phase 2]: Forward VAD events to provider
+        const msg = JSON.parse(data.toString()) as BrowserMessage
+
+        if (msg.type === 'audio') {
+          if (!msg.audio) return
+          const provider = conn.providerSocket as WebSocket | undefined
+          if (provider?.readyState === WebSocket.OPEN) {
+            provider.send(
+              JSON.stringify({
+                realtimeInput: {
+                  mediaChunks: [{ mimeType: 'audio/pcm;rate=16000', data: msg.audio }],
+                },
+              })
+            )
+          }
+          return
+        }
+
+        if (msg.type === 'interrupt') {
+          conn.isSpeaking = false
+          const provider = conn.providerSocket as WebSocket | undefined
+          if (provider?.readyState === WebSocket.OPEN) {
+            provider.send(JSON.stringify({ clientContent: { turnComplete: true } }))
+          }
+          sendToClient(clientWs, { type: 'interrupted' })
+          return
+        }
+
+        if (msg.type === 'session_end') {
+          const provider = conn.providerSocket as WebSocket | undefined
+          provider?.close()
+          return
+        }
       } catch {
-        // Ignore parse errors
+        // ignore parse errors
       }
     })
 
     clientWs.on('close', () => {
-      console.log(`[relay] Disconnected: session=${sessionId}`)
+      console.log(`[relay] Client disconnected: session=${sessionId}`)
+      const provider = conn.providerSocket as WebSocket | undefined
+      if (provider && provider.readyState === WebSocket.OPEN) {
+        provider.close()
+      }
       connections.delete(sessionId)
-      // TODO [Phase 2]: Close provider WebSocket gracefully
-      // TODO [Phase 2]: Signal save-transcript Edge Function
     })
 
     clientWs.on('error', (err) => {
-      console.error(`[relay] Error: session=${sessionId}`, err)
+      console.error(`[relay] Client WS error: session=${sessionId}`, err)
     })
   })
 
   return { connections }
-}
-
-function runMockResponseLoop(ws: WebSocket, mode: string) {
-  setTimeout(() => {
-    if (ws.readyState !== WebSocket.OPEN) return
-
-    send(ws, { type: 'assistant_start', payload: {}, timestamp: Date.now() })
-
-    setTimeout(() => {
-      if (ws.readyState !== WebSocket.OPEN) return
-      send(ws, {
-        type: 'transcript_final',
-        payload: { text: pickMockResponse(mode), speaker: 'assistant' },
-        timestamp: Date.now(),
-      })
-      setTimeout(() => {
-        if (ws.readyState !== WebSocket.OPEN) return
-        send(ws, { type: 'assistant_end', payload: {}, timestamp: Date.now() })
-      }, 400)
-    }, 1200)
-  }, 800)
 }

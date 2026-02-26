@@ -1,6 +1,3 @@
-// Relay type contracts
-// TODO [Phase 2]: Align with actual Gemini Live API message schema
-
 export interface RelaySessionConfig {
   sessionId: string
   userId: string
@@ -8,6 +5,29 @@ export interface RelaySessionConfig {
   token: string
 }
 
+// Browser -> Relay messages
+export interface BrowserMessage {
+  type: 'session_start' | 'audio' | 'interrupt' | 'session_end'
+  sessionId?: string
+  mode?: string
+  userId?: string
+  audio?: string
+  mimeType?: string
+}
+
+// Relay -> Browser messages (Phase 2 protocol)
+export interface RelayToClientMessage {
+  type: 'ready' | 'transcript' | 'audio' | 'interrupted' | 'turn_complete' | 'error'
+  text?: string
+  final?: boolean
+  speaker?: 'user' | 'assistant'
+  audio?: string
+  mimeType?: string
+  code?: string
+  message?: string
+}
+
+// Legacy fallback shape (kept for compat)
 export interface RelayMessage {
   type: string
   payload: unknown
@@ -20,18 +40,16 @@ export interface ClientConnection {
   mode: string
   socket: unknown // WebSocket
   connectedAt: Date
-  // TODO [Phase 2]: providerSocket: WebSocket (Gemini Live API connection)
+  providerSocket?: unknown // Gemini Live WebSocket
+  audioBuffer?: Buffer[]
+  isSpeaking?: boolean
 }
 
 export type RelayEventType =
-  | 'session_ready'
-  | 'transcript_partial'
-  | 'transcript_final'
-  | 'assistant_start'
-  | 'assistant_chunk'
-  | 'assistant_end'
-  | 'vad_speech_start'
-  | 'vad_speech_end'
-  | 'interruption'
+  | 'ready'
+  | 'transcript'
+  | 'audio'
+  | 'interrupted'
+  | 'turn_complete'
   | 'error'
   | 'session_end'

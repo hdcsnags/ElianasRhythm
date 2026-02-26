@@ -78,6 +78,8 @@ export interface LiveService {
   connect(config: LiveSessionConfig): Promise<void>
   disconnect(): void
   sendAudioChunk(chunk: ArrayBuffer): void
+  sendInterrupt(): void
+  isMicStarted(): boolean
   /** True when the client is running in fallback mode (no relay or relay unavailable). */
   isUsingFallback(): boolean
   onStateChange(cb: (state: LiveSessionState) => void): () => void

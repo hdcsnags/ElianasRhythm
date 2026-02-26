@@ -16,7 +16,16 @@ export function useLive(options: UseLiveOptions = {}) {
   optionsRef.current = options
 
   useEffect(() => {
-    const unsubState = liveService.onStateChange(setState)
+    const unsubState = liveService.onStateChange((s) => {
+      setState(s)
+      if (s === 'listening' || s === 'speaking') {
+        setIsMicActive(liveService.isMicStarted())
+      }
+      if (s === 'disconnected' || s === 'idle' || s === 'error') {
+        setIsMicActive(false)
+      }
+    })
+
     const unsubEvent = liveService.onEvent((event) => {
       optionsRef.current.onTranscriptEvent?.(event)
 
@@ -26,10 +35,13 @@ export function useLive(options: UseLiveOptions = {}) {
       }
 
       if (event.type === 'error') {
-        const payload = event.payload as { message?: string }
-        optionsRef.current.onError?.(payload.message ?? 'Live session error')
+        const payload = event.payload as { code?: string; message?: string }
+        if (payload.code !== 'NO_PROVIDER') {
+          optionsRef.current.onError?.(payload.message ?? 'Live session error')
+        }
       }
     })
+
     return () => {
       unsubState()
       unsubEvent()
@@ -49,20 +61,29 @@ export function useLive(options: UseLiveOptions = {}) {
   const disconnect = useCallback(() => {
     liveService.disconnect()
     setIsMicActive(false)
+    setIsFallback(false)
   }, [])
 
-  // TODO [Phase 2]: Wire mic capture to actual MediaStream + AudioWorklet
-  // For Phase 1: toggle mic active state as a UI stub
-  const toggleMic = useCallback(() => {
-    if (state === 'idle' || state === 'disconnected') return
-    setIsMicActive(prev => !prev)
-    // TODO [Phase 2]: start/stop sending audio chunks to relay
+  const sendInterrupt = useCallback(() => {
+    liveService.sendInterrupt()
+  }, [])
+
+  const triggerHolyPause = useCallback(() => {
+    // Holy Pause: send interrupt to relay, state returns to listening
+    if (state === 'speaking') {
+      liveService.sendInterrupt()
+    }
   }, [state])
 
-  // TODO [Phase 2]: Holy Pause behavior
-  const triggerHolyPause = useCallback(() => {
-    // Placeholder — state goes to 'paused' briefly then resumes
-  }, [])
+  // toggleMic is a UI mute concept — mic pipeline runs continuously once live,
+  // but we track the visual state. Pressing during speaking triggers an interrupt.
+  const toggleMic = useCallback(() => {
+    if (state === 'idle' || state === 'disconnected') return
+    if (state === 'speaking') {
+      liveService.sendInterrupt()
+    }
+    setIsMicActive(prev => !prev)
+  }, [state])
 
   return {
     state,
@@ -77,6 +98,7 @@ export function useLive(options: UseLiveOptions = {}) {
     connect,
     disconnect,
     toggleMic,
+    sendInterrupt,
     triggerHolyPause,
   }
 }

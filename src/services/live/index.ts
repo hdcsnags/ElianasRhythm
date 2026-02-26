@@ -11,6 +11,8 @@ import type {
   LiveStreamEvent,
 } from './types'
 
+import { supabase } from '../../lib/supabase/client'
+
 const RELAY_URL = import.meta.env.VITE_LIVE_RELAY_URL ?? ''
 
 type StateListener = (state: LiveSessionState) => void
@@ -18,6 +20,7 @@ type EventListener = (event: LiveStreamEvent) => void
 
 class LiveServiceImpl implements LiveService {
   private ws: WebSocket | null = null
+  private usingFallback = false
   private stateListeners: StateListener[] = []
   private eventListeners: EventListener[] = []
   private currentState: LiveSessionState = 'idle'
@@ -34,27 +37,66 @@ class LiveServiceImpl implements LiveService {
 
   async connect(config: LiveSessionConfig): Promise<void> {
     this.setState('connecting')
+    this.usingFallback = false
 
-    if (!RELAY_URL) {
-      // Graceful fallback: relay not configured — use mock response path
-      // TODO [Phase 2]: Remove fallback once relay is deployed
-      console.warn('[LiveService] VITE_LIVE_RELAY_URL not set — using safe fallback mock')
-      this.runFallbackMock(config)
+    // 1) Obtain a short-lived relay token (server-side issuer) to avoid exposing provider keys in the browser.
+    //    This token is validated by the relay (Phase 2), and can later be swapped for provider ephemeral tokens.
+    let relayToken = ''
+    let relayBaseUrl = (RELAY_URL ?? '').trim()
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      const accessToken = session?.access_token
+      if (!accessToken) {
+        throw new Error('Not authenticated')
+      }
+
+      const { data, error } = await supabase.functions.invoke('relay-live-token', {
+        body: { sessionId: config.sessionId, mode: config.mode },
+        headers: { Authorization: `Bearer ${accessToken}` },
+      })
+
+      if (error) {
+        throw new Error(error.message)
+      }
+
+      relayToken = (data as any)?.token ?? ''
+      const providedRelayUrl = (data as any)?.relayUrl ?? ''
+      if (!relayBaseUrl && typeof providedRelayUrl === 'string') {
+        relayBaseUrl = providedRelayUrl
+      }
+    } catch (err) {
+      console.warn('[LiveService] Failed to get relay token — falling back', err)
+      this.usingFallback = true
+      this.emit({ type: 'fallback', payload: { active: true, reason: 'token_unavailable' }, timestamp: Date.now() })
+      await this.runFallback(config, 'token_unavailable')
       return
     }
 
+    // 2) If relay URL is not configured, use fallback.
+    if (!relayBaseUrl) {
+      console.warn('[LiveService] Relay URL not configured — using fallback')
+      this.usingFallback = true
+      this.emit({ type: 'fallback', payload: { active: true, reason: 'relay_url_missing' }, timestamp: Date.now() })
+      await this.runFallback(config, 'relay_url_missing')
+      return
+    }
+
+    // 3) Connect to relay via WebSocket.
     try {
-      const wsUrl = `${RELAY_URL}/live?sessionId=${config.sessionId}&mode=${config.mode}`
+      const trimmed = relayBaseUrl.replace(/\/$/, '')
+      const wsUrl = `${trimmed}/live?sessionId=${encodeURIComponent(config.sessionId)}&mode=${encodeURIComponent(config.mode)}&token=${encodeURIComponent(relayToken)}`
       this.ws = new WebSocket(wsUrl)
 
       this.ws.onopen = () => {
         this.setState('listening')
+        this.emit({ type: 'fallback', payload: { active: false }, timestamp: Date.now() })
         this.ws?.send(JSON.stringify({ type: 'session_start', payload: config }))
       }
 
       this.ws.onmessage = (evt) => {
         try {
-          const event: LiveStreamEvent = JSON.parse(evt.data as string)
+          const event = JSON.parse(evt.data as string) as any as LiveStreamEvent
           this.handleIncomingEvent(event)
         } catch {
           console.error('[LiveService] Failed to parse WS message', evt.data)
@@ -66,7 +108,7 @@ class LiveServiceImpl implements LiveService {
         this.emit({ type: 'error', payload: { code: 'WS_ERROR', message: 'WebSocket connection error' }, timestamp: Date.now() })
       }
 
-      this.ws.onclose = () => {
+      this.ws.onclose = async () => {
         if (this.currentState !== 'error') {
           this.setState('disconnected')
         }
@@ -74,8 +116,9 @@ class LiveServiceImpl implements LiveService {
     } catch (err) {
       console.error('[LiveService] Connection failed', err)
       this.setState('error')
-      // Fallback to mock on connection failure
-      this.runFallbackMock(config)
+      this.usingFallback = true
+      this.emit({ type: 'fallback', payload: { active: true, reason: 'ws_connect_failed' }, timestamp: Date.now() })
+      await this.runFallback(config, 'ws_connect_failed')
     }
   }
 
@@ -89,7 +132,6 @@ class LiveServiceImpl implements LiveService {
         this.setState('listening')
         break
       case 'interruption':
-        // TODO [Phase 2]: Pause audio playback, resume listening
         this.setState('listening')
         break
       case 'session_end':
@@ -102,28 +144,36 @@ class LiveServiceImpl implements LiveService {
     this.emit(event)
   }
 
-  // Fallback mock: simulates a brief Eliana response for demo resilience
-  // This is NOT a substitute for the live path — it is for graceful degradation only
-  private runFallbackMock(config: LiveSessionConfig) {
-    setTimeout(() => {
+  // Fallback: calls server-side Edge Function for a graceful response
+  // This is NOT a substitute for the live path — it is for graceful degradation only.
+  private async runFallback(config: LiveSessionConfig, reason?: string) {
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      const accessToken = session?.access_token
+      if (!accessToken) throw new Error('Not authenticated')
+
+      const { data, error } = await supabase.functions.invoke('safe-response-fallback', {
+        body: { mode: config.mode, sessionId: config.sessionId, reason },
+        headers: { Authorization: `Bearer ${accessToken}` },
+      })
+      if (error) throw new Error(error.message)
+
+      const text = (data as any)?.text ?? (data as any)?.response ?? (data as any)?.message ?? "Peace be with you. I'm here and listening."
       this.setState('listening')
-      this.mockTimer = setTimeout(() => {
-        this.setState('speaking')
-        this.emit({
-          type: 'transcript_final',
-          payload: {
-            text: 'Peace be with you. I\'m here and listening. The live connection is warming up — your presence is welcome.',
-            speaker: 'assistant',
-          },
-          timestamp: Date.now(),
-        })
-        this.mockTimer = setTimeout(() => {
-          this.setState('listening')
-        }, 3000)
-      }, 1500)
-    }, 800)
-    // Store fallback flag for UI
-    void config
+      this.setState('speaking')
+      this.emit({
+        type: 'transcript_final',
+        payload: { text, speaker: 'assistant' },
+        timestamp: Date.now(),
+      })
+      setTimeout(() => {
+        if (this.currentState !== 'error') this.setState('listening')
+      }, 800)
+    } catch (err) {
+      console.error('[LiveService] Fallback failed', err)
+      this.setState('error')
+      this.emit({ type: 'error', payload: { code: 'FALLBACK_FAILED', message: 'Fallback failed' }, timestamp: Date.now() })
+    }
   }
 
   disconnect(): void {
@@ -144,6 +194,10 @@ class LiveServiceImpl implements LiveService {
     if (this.ws?.readyState === WebSocket.OPEN) {
       this.ws.send(chunk)
     }
+  }
+
+  isUsingFallback(): boolean {
+    return this.usingFallback
   }
 
   onStateChange(cb: StateListener): () => void {

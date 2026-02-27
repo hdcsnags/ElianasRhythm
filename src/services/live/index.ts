@@ -48,6 +48,7 @@ class LiveServiceImpl implements LiveService {
       const accessToken = session?.access_token
       if (!accessToken) throw new Error('Not authenticated')
 
+      supabase.functions.setAuth(accessToken)
       const { data, error } = await supabase.functions.invoke('relay-live-token', {
         body: { sessionId: config.sessionId, mode: config.mode },
       })
@@ -214,6 +215,7 @@ class LiveServiceImpl implements LiveService {
       const accessToken = session?.access_token
       if (!accessToken) throw new Error('Not authenticated')
 
+      supabase.functions.setAuth(accessToken)
       const { data, error } = await supabase.functions.invoke('safe-response-fallback', {
         body: { mode: config.mode, sessionId: config.sessionId, reason },
       })

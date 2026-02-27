@@ -64,20 +64,15 @@ Deno.serve(async (req: Request) => {
       )
     }
 
-    // TODO [Phase 2]: Generate real ephemeral token from live provider
-    // Example: const token = await geminiLiveApi.createEphemeralToken({ sessionId, userId })
-    // SECURITY: LIVE_PROVIDER_API_KEY must remain server-side only — never return it to the client
-
-    const placeholderToken = `relay-placeholder-${crypto.randomUUID()}`
+    const jwt = authHeader.replace(/^Bearer\s+/i, '')
 
     return new Response(
       JSON.stringify({
-        token: placeholderToken,
+        token: jwt,
         relayUrl: Deno.env.get("LIVE_RELAY_URL") ?? null,
         expiresIn: 300,
         sessionId: session.id,
         mode: session.mode,
-        // TODO [Phase 2]: Include provider-specific connection params
       }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     )

@@ -50,7 +50,6 @@ class LiveServiceImpl implements LiveService {
 
       const { data, error } = await supabase.functions.invoke('relay-live-token', {
         body: { sessionId: config.sessionId, mode: config.mode },
-        headers: { Authorization: `Bearer ${accessToken}` },
       })
 
       if (error) throw new Error(error.message)
@@ -217,7 +216,6 @@ class LiveServiceImpl implements LiveService {
 
       const { data, error } = await supabase.functions.invoke('safe-response-fallback', {
         body: { mode: config.mode, sessionId: config.sessionId, reason },
-        headers: { Authorization: `Bearer ${accessToken}` },
       })
       if (error) throw new Error(error.message)
 

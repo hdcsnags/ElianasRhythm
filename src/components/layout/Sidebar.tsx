@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from 'react-router-dom'
-import { Home, MessageCircle, BookOpen, Settings, LogOut, Leaf } from 'lucide-react'
+import { Home, MessageCircle, BookOpen, Heart, Settings, LogOut, Leaf } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
 import { cn } from '../../lib/utils'
 
@@ -13,6 +13,7 @@ const navItems: NavItem[] = [
   { to: '/', icon: Home, label: 'Home' },
   { to: '/companion', icon: MessageCircle, label: 'Companion' },
   { to: '/history', icon: BookOpen, label: 'History' },
+  { to: '/prayers', icon: Heart, label: 'Prayer Journal' },
   { to: '/settings', icon: Settings, label: 'Settings' },
 ]
 
@@ -78,6 +79,7 @@ export function MobileNav() {
   const navItems: NavItem[] = [
     { to: '/', icon: Home, label: 'Home' },
     { to: '/companion', icon: MessageCircle, label: 'Companion' },
+    { to: '/prayers', icon: Heart, label: 'Prayers' },
     { to: '/history', icon: BookOpen, label: 'History' },
     { to: '/settings', icon: Settings, label: 'Settings' },
   ]

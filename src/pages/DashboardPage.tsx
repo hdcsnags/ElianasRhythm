@@ -3,6 +3,8 @@ import { MessageCircle, Globe2, GraduationCap, Plus, Sparkles } from 'lucide-rea
 import { ModeCard } from '../components/modes/ModeCard'
 import { SessionList } from '../components/history/SessionList'
 import { Button } from '../components/ui/Button'
+import { DailyVerse } from '../components/dashboard/DailyVerse'
+import { QuickPrayer } from '../components/dashboard/QuickPrayer'
 import { useSessions } from '../hooks/useSessions'
 import { useProfile } from '../hooks/useProfile'
 import { useAuth } from '../hooks/useAuth'
@@ -40,6 +42,11 @@ export default function DashboardPage() {
           <Plus className="w-4 h-4" />
           New Session
         </Button>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <DailyVerse />
+        <QuickPrayer />
       </div>
 
       <section>
@@ -90,10 +97,6 @@ export default function DashboardPage() {
           onRetry={refetch}
         />
       </section>
-
-      {/* Phase 2 TODO: Companion orb quick-start on homepage */}
-      {/* Phase 2 TODO: Prayer log quick-entry widget */}
-      {/* Phase 2 TODO: Inspirational verse/reflection for the day */}
     </div>
   )
 }

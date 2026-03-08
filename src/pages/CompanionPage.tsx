@@ -11,6 +11,7 @@ import { useLive } from '../hooks/useLive'
 import { useMessages } from '../hooks/useMessages'
 import { useSessions } from '../hooks/useSessions'
 import { useAuth } from '../hooks/useAuth'
+import { useExplainability } from '../hooks/useExplainability'
 import { getSession } from '../services/sessions'
 import { addMessage } from '../services/messages'
 import type { Session } from '../lib/types'
@@ -28,6 +29,7 @@ export default function CompanionPage() {
   const [showSidebar, setShowSidebar] = useState(false)
 
   const { messages, loading: messagesLoading, sendMessage, appendMessage } = useMessages(session?.id)
+  const { entries: explainEntries } = useExplainability(session?.id)
 
   const handleLiveEvent = useCallback((event: LiveStreamEvent) => {
     if (!session || !user) return
@@ -186,7 +188,10 @@ export default function CompanionPage() {
         {showSidebar && (
           <aside className="w-72 border-l border-stone-200 bg-white p-4 space-y-4 overflow-y-auto hidden lg:block">
             <SessionMetadata session={session} messageCount={messages.length} />
-            <ExplainabilityPanel isPlaceholder={messages.length > 0} />
+            <ExplainabilityPanel
+              entries={explainEntries}
+              isPlaceholder={explainEntries.length === 0 && messages.length > 0}
+            />
           </aside>
         )}
       </div>

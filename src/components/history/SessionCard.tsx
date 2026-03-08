@@ -1,4 +1,4 @@
-import { MessageSquare, Clock, ChevronRight } from 'lucide-react'
+import { Clock, ChevronRight } from 'lucide-react'
 import type { Session } from '../../lib/types'
 import { formatDate, formatDuration, truncate } from '../../lib/utils'
 import { Badge } from '../ui/Badge'

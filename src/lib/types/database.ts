@@ -33,6 +33,7 @@ export interface Database {
           preferred_language_secondary?: string | null
           updated_at?: string
         }
+        Relationships: []
       }
       sessions: {
         Row: {
@@ -67,6 +68,7 @@ export interface Database {
           metadata?: Json | null
           updated_at?: string
         }
+        Relationships: []
       }
       messages: {
         Row: {
@@ -97,6 +99,7 @@ export interface Database {
           content?: string
           metadata?: Json | null
         }
+        Relationships: []
       }
       message_explainability: {
         Row: {
@@ -131,6 +134,7 @@ export interface Database {
           plain_meaning?: string | null
           notes?: string | null
         }
+        Relationships: []
       }
       scripture_vault: {
         Row: {
@@ -170,6 +174,7 @@ export interface Database {
           metadata?: Json | null
           updated_at?: string
         }
+        Relationships: []
       }
       prayer_logs: {
         Row: {
@@ -195,7 +200,20 @@ export interface Database {
           content?: string
           tags?: Json
         }
+        Relationships: []
       }
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      [_ in never]: never
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
     }
   }
 }

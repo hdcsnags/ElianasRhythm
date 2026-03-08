@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { MessageCircle, Globe2, GraduationCap, Plus, Sparkles } from 'lucide-react'
+import { MessageCircle, Globe as Globe2, GraduationCap, Plus, Sparkles } from 'lucide-react'
 import { ModeCard } from '../components/modes/ModeCard'
 import { SessionList } from '../components/history/SessionList'
 import { Button } from '../components/ui/Button'

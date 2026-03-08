@@ -7,11 +7,12 @@ export interface RelaySessionConfig {
 
 // Browser -> Relay messages
 export interface BrowserMessage {
-  type: 'session_start' | 'audio' | 'interrupt' | 'session_end'
+  type: 'session_start' | 'audio' | 'text' | 'interrupt' | 'session_end'
   sessionId?: string
   mode?: string
   userId?: string
   audio?: string
+  text?: string
   mimeType?: string
 }
 

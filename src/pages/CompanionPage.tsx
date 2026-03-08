@@ -13,7 +13,9 @@ import { useSessions } from '../hooks/useSessions'
 import { useAuth } from '../hooks/useAuth'
 import { useExplainability } from '../hooks/useExplainability'
 import { getSession } from '../services/sessions'
-import { addMessage } from '../services/messages'
+import { addMessage, getMaxSequenceIndex } from '../services/messages'
+import { liveService } from '../services/live'
+import { supabase } from '../lib/supabase/client'
 import type { Session } from '../lib/types'
 import type { LiveStreamEvent } from '../services/live'
 
@@ -27,6 +29,7 @@ export default function CompanionPage() {
   const [sessionLoading, setSessionLoading] = useState(true)
   const [partialText, setPartialText] = useState<string | undefined>()
   const [showSidebar, setShowSidebar] = useState(false)
+  const [textSending, setTextSending] = useState(false)
 
   const { messages, loading: messagesLoading, sendMessage, appendMessage } = useMessages(session?.id)
   const { entries: explainEntries } = useExplainability(session?.id)
@@ -37,19 +40,19 @@ export default function CompanionPage() {
       const p = event.payload as { text: string; speaker: string }
       if (p.speaker === 'assistant') setPartialText(p.text)
     } else if (event.type === 'transcript_final') {
-      const p = event.payload as { text: string; speaker: string; messageId?: string }
+      const p = event.payload as { text: string; speaker: string }
       setPartialText(undefined)
-      // Persist the final message to DB
-      const nextIndex = messages.length
-      addMessage({
-        session_id: session.id,
-        user_id: user.id,
-        role: p.speaker === 'user' ? 'user' : 'assistant',
-        content: p.text,
-        sequence_index: nextIndex,
-      }).then(msg => appendMessage(msg)).catch(console.error)
+      getMaxSequenceIndex(session.id).then(maxIdx => {
+        addMessage({
+          session_id: session.id,
+          user_id: user.id,
+          role: p.speaker === 'user' ? 'user' : 'assistant',
+          content: p.text,
+          sequence_index: maxIdx + 1,
+        }).then(msg => appendMessage(msg)).catch(console.error)
+      })
     }
-  }, [session, user, messages.length, appendMessage])
+  }, [session, user, appendMessage])
 
   const live = useLive({ onTranscriptEvent: handleLiveEvent })
 
@@ -98,22 +101,48 @@ export default function CompanionPage() {
   }, [live, session, endSession])
 
   const handleSendText = async (text: string) => {
-    if (!session || !text.trim()) return
-    await sendMessage(text, 'user')
-    // TODO [Phase 2]: Route text through live relay for LLM response
-    // For Phase 1: simulate assistant acknowledgment
-    setTimeout(async () => {
+    if (!session || !user || !text.trim()) return
+    setTextSending(true)
+
+    try {
+      await sendMessage(text, 'user')
+
+      if (liveService.isConnected()) {
+        liveService.sendText(text)
+      } else {
+        const history = messages.slice(-10).map(m => ({ role: m.role, content: m.content }))
+
+        const { data: authData } = await supabase.auth.getSession()
+        const accessToken = authData.session?.access_token
+        if (!accessToken) throw new Error('Not authenticated')
+
+        supabase.functions.setAuth(accessToken)
+        const { data, error } = await supabase.functions.invoke('chat-text', {
+          body: { sessionId: session.id, message: text, history },
+        })
+
+        if (error) throw new Error(error.message)
+
+        const responseText = (data as { response?: string })?.response
+          ?? "Peace be with you. I'm here and listening."
+
+        await sendMessage(responseText, 'assistant')
+      }
+    } catch (err) {
+      console.error('[CompanionPage] Text send error:', err)
       await sendMessage(
-        'I hear you. Let\'s sit with that for a moment.',
+        "I'm here with you. Let me gather my thoughts for a moment.",
         'assistant'
-      )
-    }, 800)
+      ).catch(console.error)
+    } finally {
+      setTextSending(false)
+    }
   }
 
   if (sessionLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <LoadingSpinner size="lg" label="Preparing your space…" />
+        <LoadingSpinner size="lg" label="Preparing your space..." />
       </div>
     )
   }
@@ -180,7 +209,7 @@ export default function CompanionPage() {
             />
 
             {session.status === 'active' && (
-              <TextInputBar onSend={handleSendText} disabled={live.isConnecting} />
+              <TextInputBar onSend={handleSendText} disabled={live.isConnecting || textSending} sending={textSending} />
             )}
           </div>
         </div>
@@ -199,7 +228,7 @@ export default function CompanionPage() {
   )
 }
 
-function TextInputBar({ onSend, disabled }: { onSend: (text: string) => void; disabled: boolean }) {
+function TextInputBar({ onSend, disabled, sending }: { onSend: (text: string) => void; disabled: boolean; sending?: boolean }) {
   const [value, setValue] = useState('')
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -215,7 +244,7 @@ function TextInputBar({ onSend, disabled }: { onSend: (text: string) => void; di
         type="text"
         value={value}
         onChange={e => setValue(e.target.value)}
-        placeholder="Write to Eliana…"
+        placeholder="Write to Eliana..."
         disabled={disabled}
         className="flex-1 px-3 py-2 rounded-lg border border-stone-200 focus:border-amber-400 focus:ring-1 focus:ring-amber-400 text-sm outline-none transition-colors disabled:opacity-50"
       />
@@ -224,7 +253,7 @@ function TextInputBar({ onSend, disabled }: { onSend: (text: string) => void; di
         disabled={!value.trim() || disabled}
         className="px-4 py-2 bg-amber-700 hover:bg-amber-800 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
       >
-        Send
+        {sending ? 'Thinking...' : 'Send'}
       </button>
     </form>
   )

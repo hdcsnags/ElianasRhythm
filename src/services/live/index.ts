@@ -252,6 +252,12 @@ class LiveServiceImpl implements LiveService {
     this.setState('disconnected')
   }
 
+  sendText(text: string): void {
+    if (this.ws?.readyState === WebSocket.OPEN) {
+      this.ws.send(JSON.stringify({ type: 'text', text }))
+    }
+  }
+
   sendAudioChunk(chunk: ArrayBuffer): void {
     if (this.ws?.readyState === WebSocket.OPEN) {
       this.ws.send(chunk)
@@ -264,6 +270,10 @@ class LiveServiceImpl implements LiveService {
     }
     this.playback?.interrupt()
     this.setState('listening')
+  }
+
+  isConnected(): boolean {
+    return this.ws?.readyState === WebSocket.OPEN && !this.usingFallback
   }
 
   isMicStarted(): boolean {

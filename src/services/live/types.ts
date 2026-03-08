@@ -77,10 +77,11 @@ export interface InterruptionEvent {
 export interface LiveService {
   connect(config: LiveSessionConfig): Promise<void>
   disconnect(): void
+  sendText(text: string): void
   sendAudioChunk(chunk: ArrayBuffer): void
   sendInterrupt(): void
+  isConnected(): boolean
   isMicStarted(): boolean
-  /** True when the client is running in fallback mode (no relay or relay unavailable). */
   isUsingFallback(): boolean
   onStateChange(cb: (state: LiveSessionState) => void): () => void
   onEvent(cb: (event: LiveStreamEvent) => void): () => void

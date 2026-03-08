@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react'
 import { cn } from '../../lib/utils'
 import type { LiveSessionState } from '../../services/live'
 
@@ -6,90 +7,117 @@ interface CompanionOrbProps {
   size?: 'sm' | 'md' | 'lg'
 }
 
-const stateConfig: Record<LiveSessionState, { label: string; color: string; pulse: boolean; ring: string }> = {
+const stateConfig: Record<LiveSessionState, {
+  label: string
+  gradient: string
+  glow: string
+  animate: 'none' | 'breathe' | 'pulse' | 'wave'
+}> = {
   idle: {
     label: 'Ready',
-    color: 'bg-amber-100',
-    pulse: false,
-    ring: 'ring-amber-200',
+    gradient: 'from-amber-100 to-amber-200',
+    glow: 'shadow-amber-200/40',
+    animate: 'none',
   },
   connecting: {
     label: 'Connecting',
-    color: 'bg-amber-200',
-    pulse: true,
-    ring: 'ring-amber-300',
+    gradient: 'from-amber-200 to-amber-300',
+    glow: 'shadow-amber-300/50',
+    animate: 'pulse',
   },
   listening: {
     label: 'Listening',
-    color: 'bg-amber-400',
-    pulse: true,
-    ring: 'ring-amber-300',
+    gradient: 'from-amber-300 to-amber-500',
+    glow: 'shadow-amber-400/60',
+    animate: 'breathe',
   },
   speaking: {
     label: 'Speaking',
-    color: 'bg-amber-500',
-    pulse: true,
-    ring: 'ring-amber-400',
+    gradient: 'from-amber-400 to-amber-600',
+    glow: 'shadow-amber-500/70',
+    animate: 'wave',
   },
   paused: {
     label: 'Paused',
-    color: 'bg-stone-300',
-    pulse: false,
-    ring: 'ring-stone-200',
+    gradient: 'from-stone-200 to-stone-300',
+    glow: 'shadow-stone-300/30',
+    animate: 'none',
   },
   error: {
     label: 'Error',
-    color: 'bg-red-300',
-    pulse: false,
-    ring: 'ring-red-200',
+    gradient: 'from-red-200 to-red-400',
+    glow: 'shadow-red-300/40',
+    animate: 'none',
   },
   disconnected: {
     label: 'Disconnected',
-    color: 'bg-stone-200',
-    pulse: false,
-    ring: 'ring-stone-100',
+    gradient: 'from-stone-100 to-stone-200',
+    glow: 'shadow-stone-200/20',
+    animate: 'none',
   },
+}
+
+const sizes = {
+  sm: { container: 'w-20 h-20', orb: 'w-16 h-16', inner: 'w-8 h-8' },
+  md: { container: 'w-36 h-36', orb: 'w-28 h-28', inner: 'w-14 h-14' },
+  lg: { container: 'w-48 h-48', orb: 'w-40 h-40', inner: 'w-20 h-20' },
 }
 
 export function CompanionOrb({ state, size = 'md' }: CompanionOrbProps) {
   const config = stateConfig[state]
-
-  const sizes = {
-    sm: { orb: 'w-16 h-16', inner: 'w-10 h-10', ring: 'w-16 h-16' },
-    md: { orb: 'w-28 h-28', inner: 'w-18 h-18', ring: 'w-28 h-28' },
-    lg: { orb: 'w-40 h-40', inner: 'w-28 h-28', ring: 'w-40 h-40' },
-  }
-
   const s = sizes[size]
+  const prevState = useRef(state)
+
+  useEffect(() => {
+    prevState.current = state
+  }, [state])
+
+  const animClass =
+    config.animate === 'breathe' ? 'animate-orb-breathe' :
+    config.animate === 'pulse' ? 'animate-orb-pulse' :
+    config.animate === 'wave' ? 'animate-orb-wave' : ''
 
   return (
     <div className="flex flex-col items-center gap-3">
-      <div className="relative flex items-center justify-center">
-        {config.pulse && (
-          <>
-            <div className={cn(
-              'absolute rounded-full opacity-20 animate-ping',
-              s.ring, config.color
-            )} />
-            <div className={cn(
-              'absolute rounded-full opacity-10 animate-pulse',
-              'scale-125',
-              s.ring, config.color
-            )} />
-          </>
+      <div className={cn('relative flex items-center justify-center', s.container)}>
+        {config.animate !== 'none' && (
+          <div className={cn(
+            'absolute rounded-full bg-gradient-to-br opacity-20',
+            config.gradient,
+            s.orb,
+            config.animate === 'wave' ? 'animate-ping' : 'animate-pulse'
+          )} style={{ animationDuration: config.animate === 'wave' ? '2s' : '3s' }} />
         )}
+
+        {config.animate === 'wave' && (
+          <div className={cn(
+            'absolute rounded-full bg-gradient-to-br opacity-10',
+            config.gradient,
+            s.orb,
+            'animate-ping'
+          )} style={{ animationDuration: '3s', animationDelay: '0.5s' }} />
+        )}
+
         <div className={cn(
-          'rounded-full flex items-center justify-center ring-4 transition-all duration-700',
-          s.orb, config.color, config.ring
+          'relative rounded-full bg-gradient-to-br flex items-center justify-center',
+          'shadow-xl transition-all duration-700 ease-in-out',
+          config.gradient,
+          config.glow,
+          s.orb,
+          animClass
         )}>
           <div className={cn(
-            'rounded-full opacity-60',
-            size === 'sm' ? 'w-6 h-6' : size === 'md' ? 'w-12 h-12' : 'w-20 h-20',
-            config.color
+            'rounded-full bg-white/30 backdrop-blur-sm transition-all duration-700',
+            s.inner,
+            config.animate === 'wave' && 'animate-orb-inner-wave'
           )} />
         </div>
       </div>
-      <span className="text-xs text-stone-400 font-medium tracking-wide uppercase">
+
+      <span className={cn(
+        'text-xs font-medium tracking-widest uppercase transition-all duration-500',
+        state === 'error' ? 'text-red-500' : 'text-stone-400'
+      )}>
         {config.label}
       </span>
     </div>

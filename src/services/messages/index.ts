@@ -12,6 +12,18 @@ export async function getMessages(sessionId: string): Promise<Message[]> {
   return data
 }
 
+export async function getMaxSequenceIndex(sessionId: string): Promise<number> {
+  const { data } = await supabase
+    .from('messages')
+    .select('sequence_index')
+    .eq('session_id', sessionId)
+    .order('sequence_index', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  return data?.sequence_index ?? -1
+}
+
 export async function addMessage(insert: MessageInsert): Promise<Message> {
   const { data, error } = await supabase
     .from('messages')

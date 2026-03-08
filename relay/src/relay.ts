@@ -275,6 +275,23 @@ export function createRelayServer(wss: WebSocketServer) {
           return
         }
 
+        if (msg.type === 'text') {
+          const text = (msg as Record<string, unknown>).text as string | undefined
+          if (!text) return
+          const provider = conn.providerSocket as WebSocket | undefined
+          if (provider?.readyState === WebSocket.OPEN) {
+            provider.send(
+              JSON.stringify({
+                clientContent: {
+                  turns: [{ role: 'user', parts: [{ text }] }],
+                  turnComplete: true,
+                },
+              })
+            )
+          }
+          return
+        }
+
         if (msg.type === 'interrupt') {
           conn.isSpeaking = false
           const provider = conn.providerSocket as WebSocket | undefined

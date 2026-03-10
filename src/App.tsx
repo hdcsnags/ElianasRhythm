@@ -5,6 +5,7 @@ import { PageLoader } from './components/ui/LoadingSpinner'
 import AppShell from './components/layout/AppShell'
 import LandingPage from './pages/LandingPage'
 import AuthPage from './pages/AuthPage'
+import AuthCallbackPage from './pages/AuthCallbackPage'
 import CompanionPage from './pages/CompanionPage'
 import HistoryPage from './pages/HistoryPage'
 import SettingsPage from './pages/SettingsPage'
@@ -36,6 +37,10 @@ const router = createBrowserRouter([
         <AuthPage />
       </PublicOnlyRoute>
     ),
+  },
+  {
+    path: '/auth/callback',
+    element: <AuthCallbackPage />,
   },
   {
     path: '/companion',

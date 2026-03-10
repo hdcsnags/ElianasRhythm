@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import type { Profile, ProfileUpdate, ResponseStyle } from '../../lib/types'
-import { Button } from '../ui/Button'
 
 interface CompanionSettingsProps {
   profile: Profile | null
@@ -38,14 +37,14 @@ export function CompanionSettings({ profile, onSave }: CompanionSettingsProps) {
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-sm font-semibold text-stone-800 mb-1">Response Style</h3>
-        <p className="text-xs text-stone-500 mb-3">How Eliana shapes her responses to you.</p>
+        <h3 className="text-sm font-medium text-cream mb-1">Response Style</h3>
+        <p className="text-xs text-cream/[0.28] mb-3">How Eliana shapes her responses to you.</p>
         <div className="space-y-2">
           {responseStyles.map(({ value, label, description }) => (
             <label
               key={value}
-              className="flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-colors hover:bg-stone-50"
-              style={{ borderColor: style === value ? '#b45309' : '#e7e5e4' }}
+              className="flex items-start gap-3 p-3 border cursor-pointer transition-colors hover:bg-gold/[0.03]"
+              style={{ borderColor: style === value ? 'rgba(201,168,76,0.4)' : 'rgba(201,168,76,0.08)' }}
             >
               <input
                 type="radio"
@@ -53,50 +52,48 @@ export function CompanionSettings({ profile, onSave }: CompanionSettingsProps) {
                 value={value}
                 checked={style === value}
                 onChange={() => setStyle(value)}
-                className="mt-0.5 accent-amber-700"
+                className="mt-0.5 accent-gold"
               />
               <div>
-                <p className="text-sm font-medium text-stone-800">{label}</p>
-                <p className="text-xs text-stone-500">{description}</p>
+                <p className="text-sm text-cream">{label}</p>
+                <p className="text-xs text-cream/[0.28]">{description}</p>
               </div>
             </label>
           ))}
         </div>
       </div>
 
-      <div className="border-t border-stone-100 pt-6">
+      <div className="border-t border-gold/[0.08] pt-6">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <h3 className="text-sm font-semibold text-stone-800">Holy Pause</h3>
-            <p className="text-xs text-stone-500 mt-0.5 max-w-sm">
+            <h3 className="text-sm font-medium text-cream">Holy Pause</h3>
+            <p className="text-xs text-cream/[0.28] mt-0.5 max-w-sm">
               Allows a moment of intentional silence before Eliana responds.
-              {/* TODO [Phase 2]: Wire timing, silence threshold, and interruption sensitivity */}
             </p>
-            <p className="text-xs text-amber-700 mt-1">Behavior tuning — Phase 2</p>
+            <p className="text-xs text-gold/50 mt-1">Behavior tuning coming in Phase 2</p>
           </div>
           <button
             role="switch"
             aria-checked={holyPause}
             onClick={() => setHolyPause(prev => !prev)}
-            className="relative flex-shrink-0 w-11 h-6 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-amber-600 focus:ring-offset-2"
-            style={{ backgroundColor: holyPause ? '#b45309' : '#d6d3d1' }}
+            className="relative flex-shrink-0 w-11 h-6 rounded-full transition-colors focus:outline-none"
+            style={{ backgroundColor: holyPause ? '#C9A84C' : 'rgba(245,239,224,0.1)' }}
           >
             <span
-              className="block w-5 h-5 rounded-full bg-white shadow transition-transform"
+              className="block w-5 h-5 rounded-full bg-night shadow transition-transform"
               style={{ transform: holyPause ? 'translateX(22px)' : 'translateX(2px)', marginTop: '2px' }}
             />
           </button>
         </div>
       </div>
 
-      <Button
-        variant="primary"
+      <button
         onClick={handleSave}
-        loading={saving}
-        className="w-full sm:w-auto"
+        disabled={saving}
+        className="px-6 py-2.5 bg-gradient-to-br from-gold to-[#A07830] text-night text-sm font-medium tracking-[0.1em] uppercase transition-all hover:brightness-110 disabled:opacity-50"
       >
-        {saved ? 'Saved' : 'Save Preferences'}
-      </Button>
+        {saving ? 'Saving...' : saved ? 'Saved' : 'Save Preferences'}
+      </button>
     </div>
   )
 }

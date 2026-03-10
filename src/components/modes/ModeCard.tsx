@@ -1,6 +1,4 @@
 import { ReactNode } from 'react'
-import { ArrowRight } from 'lucide-react'
-import { Badge } from '../ui/Badge'
 import { cn } from '../../lib/utils'
 
 interface ModeCardProps {
@@ -19,43 +17,35 @@ export function ModeCard({ title, description, icon, badge, isPrimary, onClick, 
       onClick={onClick}
       disabled={disabled}
       className={cn(
-        'group relative w-full text-left rounded-2xl p-6 transition-all duration-200',
-        'border focus:outline-none focus:ring-2 focus:ring-amber-600 focus:ring-offset-2',
+        'group relative w-full text-left p-6 transition-all duration-200 border',
         isPrimary
-          ? 'bg-white border-amber-200 hover:border-amber-400 hover:shadow-md shadow-sm'
-          : 'bg-white border-stone-200 hover:border-stone-300 hover:shadow-sm',
-        disabled && 'opacity-60 cursor-not-allowed hover:border-stone-200 hover:shadow-none'
+          ? 'bg-gradient-to-br from-gold/[0.08] to-surface border-gold/25 hover:border-gold/40'
+          : 'bg-surface border-gold/10 hover:border-gold/25',
+        disabled && 'opacity-50 cursor-not-allowed hover:border-gold/10'
       )}
     >
+      {isPrimary && (
+        <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-gold to-transparent" />
+      )}
+
       <div className="flex items-start justify-between mb-4">
-        <div className={cn(
-          'w-10 h-10 rounded-xl flex items-center justify-center',
-          isPrimary ? 'bg-amber-50 text-amber-700' : 'bg-stone-100 text-stone-600'
-        )}>
+        <div className="text-gold/40">
           {icon}
         </div>
         {badge && (
-          <Badge variant={badge.variant}>{badge.label}</Badge>
+          <span className={cn(
+            'text-[0.55rem] font-display tracking-[0.15em] uppercase border px-1.5 py-px',
+            badge.variant === 'active' ? 'border-gold text-gold' :
+            badge.variant === 'prototype' ? 'border-cream/[0.28] text-cream/[0.28]' :
+            'border-cream/10 text-cream/[0.15]'
+          )}>
+            {badge.label}
+          </span>
         )}
       </div>
 
-      <h3 className={cn(
-        'font-semibold mb-1.5',
-        isPrimary ? 'text-stone-900 text-lg' : 'text-stone-800 text-base'
-      )}>
-        {title}
-      </h3>
-      <p className="text-sm text-stone-500 leading-relaxed">{description}</p>
-
-      {!disabled && onClick && (
-        <div className={cn(
-          'flex items-center gap-1 mt-4 text-sm font-medium transition-colors',
-          isPrimary ? 'text-amber-700 group-hover:text-amber-800' : 'text-stone-500 group-hover:text-stone-700'
-        )}>
-          Begin
-          <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" />
-        </div>
-      )}
+      <h3 className="font-serif text-xl text-cream mb-1.5">{title}</h3>
+      <p className="text-sm text-cream/[0.28] leading-relaxed">{description}</p>
     </button>
   )
 }

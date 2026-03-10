@@ -18,25 +18,25 @@ export function QuickPrayer() {
   }
 
   return (
-    <div className="rounded-xl border border-stone-200 bg-white overflow-hidden">
+    <div className="border border-gold/[0.08] bg-surface overflow-hidden">
       <button
         onClick={() => { setIsOpen(prev => !prev); setSaved(false) }}
-        className="w-full flex items-center justify-between px-5 py-4 hover:bg-stone-50 transition-colors"
+        className="w-full flex items-center justify-between px-5 py-4 hover:bg-gold/[0.03] transition-colors"
       >
         <div className="flex items-center gap-2.5">
-          <Heart className="w-4 h-4 text-amber-600" />
-          <span className="text-sm font-medium text-stone-800">Quick Prayer</span>
+          <Heart className="w-4 h-4 text-gold/50" />
+          <span className="text-sm text-cream">Quick Prayer</span>
         </div>
         {isOpen
-          ? <ChevronUp className="w-4 h-4 text-stone-400" />
-          : <ChevronDown className="w-4 h-4 text-stone-400" />
+          ? <ChevronUp className="w-4 h-4 text-cream/[0.28]" />
+          : <ChevronDown className="w-4 h-4 text-cream/[0.28]" />
         }
       </button>
       {isOpen && (
-        <div className="px-5 pb-4 border-t border-stone-100">
+        <div className="px-5 pb-4 border-t border-gold/[0.08]">
           {saved ? (
             <div className="py-4 text-center">
-              <p className="text-sm text-emerald-600 font-medium">Prayer saved</p>
+              <p className="text-sm text-gold">Prayer saved</p>
             </div>
           ) : (
             <div className="pt-3">

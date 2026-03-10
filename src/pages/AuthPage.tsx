@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Leaf, Mail, Eye, EyeOff } from 'lucide-react'
+import { Mail, Eye, EyeOff } from 'lucide-react'
 import { supabase } from '../lib/supabase/client'
 import { useAuth } from '../hooks/useAuth'
-import { Button } from '../components/ui/Button'
+import { StarField } from '../components/companion/StarField'
 
 type AuthMode = 'signin' | 'signup'
 
@@ -82,30 +82,43 @@ export default function AuthPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-warm-50 flex items-center justify-center">
-        <div className="w-6 h-6 rounded-full bg-amber-300 animate-pulse" />
+      <div className="min-h-screen bg-night flex items-center justify-center">
+        <div className="w-6 h-6 rounded-full bg-gold/30 animate-pulse" />
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-warm-50 flex flex-col items-center justify-center px-4">
-      <div className="w-full max-w-sm">
+    <div className="min-h-screen bg-night flex flex-col items-center justify-center px-4 relative overflow-hidden">
+      <div className="absolute inset-0 pointer-events-none" style={{
+        background: 'radial-gradient(ellipse 60% 50% at 50% 40%, rgba(201,168,76,0.05) 0%, transparent 70%)'
+      }} />
+      <StarField count={50} />
+
+      <div className="w-full max-w-sm relative z-10">
         <div className="flex flex-col items-center mb-10">
-          <div className="w-14 h-14 rounded-2xl bg-amber-700/10 flex items-center justify-center mb-4">
-            <Leaf className="w-7 h-7 text-amber-700" />
+          <div className="relative mb-6">
+            <div className="absolute w-[100px] h-[100px] rounded-full border border-gold/[0.15] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-ring-pulse" />
+            <div className="absolute w-[130px] h-[130px] rounded-full border border-gold/[0.08] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-ring-pulse" style={{ animationDelay: '0.8s' }} />
+            <div
+              className="w-16 h-16 rounded-full animate-orb-breathe relative z-10"
+              style={{
+                background: 'radial-gradient(circle at 35% 35%, #E8C96A, #C9A84C 40%, #8B6520)',
+                boxShadow: '0 0 40px rgba(201,168,76,0.35), 0 0 80px rgba(201,168,76,0.1)',
+              }}
+            />
           </div>
-          <h1 className="text-2xl font-semibold text-stone-900 tracking-tight">Eliana</h1>
-          <p className="text-sm text-stone-500 mt-1.5 text-center leading-relaxed">
-            A calm, grounded companion for the journey.
+          <h1 className="font-serif text-4xl text-cream font-light tracking-wide">Eliana</h1>
+          <p className="font-display text-[0.6rem] tracking-[0.3em] text-gold uppercase mt-1">
+            God Has Answered
           </p>
         </div>
 
-        <div className="bg-white rounded-2xl border border-stone-200 shadow-sm p-6">
-          <h2 className="text-base font-semibold text-stone-800 mb-1">
+        <div className="border border-gold/[0.12] bg-deep p-6">
+          <h2 className="font-serif text-lg text-cream mb-1">
             {mode === 'signin' ? 'Welcome back' : 'Create your account'}
           </h2>
-          <p className="text-sm text-stone-500 mb-5">
+          <p className="text-sm text-cream/[0.28] mb-5">
             {mode === 'signin'
               ? 'Sign in to continue your journey.'
               : 'Begin your journey with Eliana.'}
@@ -114,10 +127,10 @@ export default function AuthPage() {
           <button
             onClick={handleGoogleSignIn}
             disabled={googleLoading}
-            className="w-full flex items-center justify-center gap-3 px-4 py-2.5 rounded-lg border border-stone-200 hover:bg-stone-50 text-sm font-medium text-stone-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full flex items-center justify-center gap-3 px-4 py-2.5 border border-gold/[0.15] hover:border-gold/30 text-sm text-cream transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {googleLoading ? (
-              <svg className="animate-spin h-4 w-4 text-stone-400" viewBox="0 0 24 24" fill="none">
+              <svg className="animate-spin h-4 w-4 text-gold" viewBox="0 0 24 24" fill="none">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
               </svg>
@@ -133,15 +146,15 @@ export default function AuthPage() {
           </button>
 
           <div className="flex items-center gap-3 my-5">
-            <div className="flex-1 h-px bg-stone-200" />
-            <span className="text-xs text-stone-400">or</span>
-            <div className="flex-1 h-px bg-stone-200" />
+            <div className="flex-1 h-px bg-gold/[0.08]" />
+            <span className="text-xs text-cream/[0.2] font-display tracking-wider uppercase">or</span>
+            <div className="flex-1 h-px bg-gold/[0.08]" />
           </div>
 
           <form onSubmit={handleEmailAuth} className="space-y-3.5">
             {mode === 'signup' && (
               <div>
-                <label className="block text-sm font-medium text-stone-700 mb-1.5">
+                <label className="block text-sm text-cream/[0.4] mb-1.5">
                   Display name
                 </label>
                 <input
@@ -149,16 +162,16 @@ export default function AuthPage() {
                   value={displayName}
                   onChange={e => setDisplayName(e.target.value)}
                   placeholder="How should Eliana address you?"
-                  className="w-full px-3 py-2.5 rounded-lg border border-stone-200 focus:border-amber-400 focus:ring-1 focus:ring-amber-400 text-sm outline-none transition-colors"
+                  className="w-full px-3 py-2.5 bg-transparent border border-gold/[0.12] text-cream text-sm outline-none transition-colors focus:border-gold/30"
                 />
               </div>
             )}
             <div>
-              <label className="block text-sm font-medium text-stone-700 mb-1.5">
+              <label className="block text-sm text-cream/[0.4] mb-1.5">
                 Email address
               </label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400" />
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-cream/[0.2]" />
                 <input
                   type="email"
                   value={email}
@@ -166,12 +179,12 @@ export default function AuthPage() {
                   placeholder="you@example.com"
                   required
                   autoFocus
-                  className="w-full pl-9 pr-3 py-2.5 rounded-lg border border-stone-200 focus:border-amber-400 focus:ring-1 focus:ring-amber-400 text-sm outline-none transition-colors"
+                  className="w-full pl-9 pr-3 py-2.5 bg-transparent border border-gold/[0.12] text-cream text-sm outline-none transition-colors focus:border-gold/30"
                 />
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-stone-700 mb-1.5">
+              <label className="block text-sm text-cream/[0.4] mb-1.5">
                 Password
               </label>
               <div className="relative">
@@ -182,37 +195,46 @@ export default function AuthPage() {
                   placeholder={mode === 'signup' ? 'At least 6 characters' : 'Your password'}
                   required
                   minLength={6}
-                  className="w-full px-3 py-2.5 pr-10 rounded-lg border border-stone-200 focus:border-amber-400 focus:ring-1 focus:ring-amber-400 text-sm outline-none transition-colors"
+                  className="w-full px-3 py-2.5 pr-10 bg-transparent border border-gold/[0.12] text-cream text-sm outline-none transition-colors focus:border-gold/30"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(prev => !prev)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-600 transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-cream/[0.2] hover:text-cream/[0.4] transition-colors"
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
             </div>
 
-            {error && <p className="text-sm text-red-600">{error}</p>}
+            {error && <p className="text-sm text-danger">{error}</p>}
 
-            <Button type="submit" variant="primary" loading={submitting} className="w-full">
-              {mode === 'signin' ? 'Sign in' : 'Create account'}
-            </Button>
+            <button
+              type="submit"
+              disabled={submitting}
+              className="w-full py-2.5 bg-gradient-to-br from-gold to-[#A07830] text-night text-sm font-medium tracking-[0.1em] uppercase transition-all hover:brightness-110 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {submitting ? (
+                <svg className="animate-spin h-4 w-4 mx-auto" viewBox="0 0 24 24" fill="none">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                </svg>
+              ) : mode === 'signin' ? 'Sign in' : 'Create account'}
+            </button>
           </form>
 
-          <p className="mt-4 text-center text-sm text-stone-500">
+          <p className="mt-4 text-center text-sm text-cream/[0.28]">
             {mode === 'signin' ? "Don't have an account?" : 'Already have an account?'}{' '}
             <button
               onClick={switchMode}
-              className="text-amber-700 hover:text-amber-800 font-medium transition-colors"
+              className="text-gold hover:text-gold-soft transition-colors"
             >
               {mode === 'signin' ? 'Sign up' : 'Sign in'}
             </button>
           </p>
         </div>
 
-        <p className="text-xs text-center text-stone-400 mt-6 leading-relaxed">
+        <p className="text-[0.7rem] text-center text-cream/[0.15] mt-6 leading-relaxed">
           Eliana is a companion, not a therapist or crisis service.
           <br />
           Please seek professional care when needed.

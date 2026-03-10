@@ -4,59 +4,79 @@ export default {
   theme: {
     extend: {
       colors: {
-        warm: {
-          50: '#FAFAF7',
-          100: '#F5F2EC',
-          200: '#EDE8DF',
-          300: '#DDD0B9',
-          400: '#C0A882',
-          500: '#9E8462',
-          600: '#7A6445',
-          700: '#5C4D32',
-          800: '#3D3220',
-          900: '#2C2416',
-          950: '#1C1710',
+        night: '#0D0D14',
+        deep: '#13131E',
+        surface: '#1A1A2A',
+        'surface-2': '#1E1E30',
+        gold: {
+          DEFAULT: '#C9A84C',
+          soft: '#D4B96A',
+          dim: 'rgba(201,168,76,0.12)',
+          glow: 'rgba(201,168,76,0.25)',
         },
+        cream: '#F5EFE0',
+        danger: '#C0524A',
       },
       fontFamily: {
-        sans: [
-          'Inter',
-          'system-ui',
-          '-apple-system',
-          'BlinkMacSystemFont',
-          '"Segoe UI"',
-          'sans-serif',
-        ],
+        sans: ['DM Sans', 'system-ui', 'sans-serif'],
+        serif: ['Cormorant Garamond', 'Georgia', 'serif'],
+        display: ['Cinzel', 'serif'],
       },
       animation: {
-        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-        'glow': 'glow 2s ease-in-out infinite alternate',
-        'orb-breathe': 'orb-breathe 4s ease-in-out infinite',
-        'orb-pulse': 'orb-pulse 2s ease-in-out infinite',
-        'orb-wave': 'orb-wave 1.5s ease-in-out infinite',
-        'orb-inner-wave': 'orb-inner-wave 1.5s ease-in-out infinite',
+        'orb-breathe': 'orbBreathe 5s ease-in-out infinite',
+        'orb-pulse': 'orbPulse 1.5s ease-in-out infinite',
+        'orb-listen': 'orbListen 2s ease-in-out infinite',
+        'orb-speak': 'orbSpeak 0.8s ease-in-out infinite',
+        'orb-think': 'orbThink 3s ease-in-out infinite',
+        'ring-pulse': 'ringPulse 3s ease-in-out infinite',
+        'ring-spin': 'ringSpin 3s linear infinite',
+        'mode-pulse': 'modePulse 2s ease-in-out infinite',
+        'typing-dot': 'typingDot 1.2s ease-in-out infinite',
+        'msg-in': 'msgIn 0.4s ease forwards',
       },
       keyframes: {
-        glow: {
-          from: { boxShadow: '0 0 10px rgba(180, 83, 9, 0.1)' },
-          to: { boxShadow: '0 0 24px rgba(180, 83, 9, 0.25)' },
+        orbBreathe: {
+          '0%, 100%': { transform: 'scale(1)' },
+          '50%': { transform: 'scale(1.03)' },
         },
-        'orb-breathe': {
-          '0%, 100%': { transform: 'scale(1)', opacity: '1' },
-          '50%': { transform: 'scale(1.05)', opacity: '0.92' },
+        orbPulse: {
+          '0%, 100%': { transform: 'scale(1)', opacity: '0.85' },
+          '50%': { transform: 'scale(1.05)', opacity: '1' },
         },
-        'orb-pulse': {
-          '0%, 100%': { transform: 'scale(1)', opacity: '0.9' },
-          '50%': { transform: 'scale(1.03)', opacity: '1' },
+        orbListen: {
+          '0%, 100%': { transform: 'scale(1)' },
+          '30%': { transform: 'scale(1.04)' },
+          '60%': { transform: 'scale(0.98)' },
         },
-        'orb-wave': {
+        orbSpeak: {
           '0%, 100%': { transform: 'scale(1)' },
           '25%': { transform: 'scale(1.06)' },
           '75%': { transform: 'scale(0.97)' },
         },
-        'orb-inner-wave': {
-          '0%, 100%': { transform: 'scale(1)', opacity: '0.3' },
-          '50%': { transform: 'scale(1.15)', opacity: '0.5' },
+        orbThink: {
+          '0%, 100%': { transform: 'scale(1) rotate(0deg)' },
+          '33%': { transform: 'scale(1.02) rotate(1deg)' },
+          '66%': { transform: 'scale(0.99) rotate(-1deg)' },
+        },
+        ringPulse: {
+          '0%, 100%': { transform: 'translate(-50%,-50%) scale(1)', opacity: '0.8' },
+          '50%': { transform: 'translate(-50%,-50%) scale(1.06)', opacity: '0.3' },
+        },
+        ringSpin: {
+          from: { transform: 'translate(-50%,-50%) rotate(0deg)' },
+          to: { transform: 'translate(-50%,-50%) rotate(360deg)' },
+        },
+        modePulse: {
+          '0%, 100%': { opacity: '0.5' },
+          '50%': { opacity: '1' },
+        },
+        typingDot: {
+          '0%, 100%': { opacity: '0.3', transform: 'translateY(0)' },
+          '50%': { opacity: '1', transform: 'translateY(-3px)' },
+        },
+        msgIn: {
+          from: { opacity: '0', transform: 'translateY(8px)' },
+          to: { opacity: '1', transform: 'translateY(0)' },
         },
       },
     },

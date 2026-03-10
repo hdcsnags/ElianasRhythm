@@ -16,22 +16,22 @@ export function LoadingSpinner({ size = 'md', className, label }: LoadingSpinner
   return (
     <div className={cn('flex flex-col items-center justify-center gap-3', className)}>
       <svg
-        className={cn('animate-spin text-amber-600', sizes[size])}
+        className={cn('animate-spin text-gold', sizes[size])}
         viewBox="0 0 24 24"
         fill="none"
       >
         <circle className="opacity-20" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" />
         <path className="opacity-80" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
       </svg>
-      {label && <p className="text-sm text-stone-500">{label}</p>}
+      {label && <p className="text-sm text-cream/[0.28]">{label}</p>}
     </div>
   )
 }
 
 export function PageLoader({ label }: { label?: string }) {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-warm-50">
-      <LoadingSpinner size="lg" label={label ?? 'Loading…'} />
+    <div className="min-h-screen flex items-center justify-center bg-night">
+      <LoadingSpinner size="lg" label={label ?? 'Loading...'} />
     </div>
   )
 }

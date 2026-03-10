@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import type { Profile, ProfileUpdate } from '../../lib/types'
-import { Button } from '../ui/Button'
 import { useAuth } from '../../hooks/useAuth'
 
 interface ProfileSettingsProps {
@@ -34,34 +33,34 @@ export function ProfileSettings({ profile, onSave }: ProfileSettingsProps) {
   return (
     <div className="space-y-5">
       <div>
-        <label className="block text-sm font-medium text-stone-700 mb-1.5">Email</label>
+        <label className="block text-sm text-cream/[0.4] mb-1.5">Email</label>
         <input
           type="email"
           value={user?.email ?? ''}
           disabled
-          className="w-full px-3 py-2 rounded-lg border border-stone-200 bg-stone-50 text-stone-500 text-sm"
+          className="w-full px-3 py-2 bg-surface border border-gold/[0.08] text-cream/[0.3] text-sm"
         />
-        <p className="text-xs text-stone-400 mt-1">Email cannot be changed here.</p>
+        <p className="text-xs text-cream/[0.15] mt-1">Email cannot be changed here.</p>
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-stone-700 mb-1.5">Display Name</label>
+        <label className="block text-sm text-cream/[0.4] mb-1.5">Display Name</label>
         <input
           type="text"
           value={displayName}
           onChange={e => setDisplayName(e.target.value)}
           placeholder="Your name"
-          className="w-full px-3 py-2 rounded-lg border border-stone-200 focus:border-amber-400 focus:ring-1 focus:ring-amber-400 text-sm outline-none transition-colors"
+          className="w-full px-3 py-2 bg-transparent border border-gold/[0.12] text-cream text-sm outline-none transition-colors focus:border-gold/30"
         />
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-stone-700 mb-1.5">Primary Language</label>
+          <label className="block text-sm text-cream/[0.4] mb-1.5">Primary Language</label>
           <select
             value={primaryLang}
             onChange={e => setPrimaryLang(e.target.value)}
-            className="w-full px-3 py-2 rounded-lg border border-stone-200 focus:border-amber-400 focus:ring-1 focus:ring-amber-400 text-sm outline-none bg-white"
+            className="w-full px-3 py-2 bg-surface border border-gold/[0.12] text-cream text-sm outline-none transition-colors focus:border-gold/30"
           >
             <option value="en">English</option>
             <option value="es">Spanish</option>
@@ -74,14 +73,14 @@ export function ProfileSettings({ profile, onSave }: ProfileSettingsProps) {
           </select>
         </div>
         <div>
-          <label className="block text-sm font-medium text-stone-700 mb-1.5">
+          <label className="block text-sm text-cream/[0.4] mb-1.5">
             Secondary Language
-            <span className="text-stone-400 font-normal ml-1">(optional)</span>
+            <span className="text-cream/[0.15] ml-1">(optional)</span>
           </label>
           <select
             value={secondaryLang}
             onChange={e => setSecondaryLang(e.target.value)}
-            className="w-full px-3 py-2 rounded-lg border border-stone-200 focus:border-amber-400 focus:ring-1 focus:ring-amber-400 text-sm outline-none bg-white"
+            className="w-full px-3 py-2 bg-surface border border-gold/[0.12] text-cream text-sm outline-none transition-colors focus:border-gold/30"
           >
             <option value="">None</option>
             <option value="en">English</option>
@@ -96,14 +95,13 @@ export function ProfileSettings({ profile, onSave }: ProfileSettingsProps) {
         </div>
       </div>
 
-      <Button
-        variant="primary"
+      <button
         onClick={handleSave}
-        loading={saving}
-        className="w-full sm:w-auto"
+        disabled={saving}
+        className="px-6 py-2.5 bg-gradient-to-br from-gold to-[#A07830] text-night text-sm font-medium tracking-[0.1em] uppercase transition-all hover:brightness-110 disabled:opacity-50"
       >
-        {saved ? 'Saved' : 'Save Profile'}
-      </Button>
+        {saving ? 'Saving...' : saved ? 'Saved' : 'Save Profile'}
+      </button>
     </div>
   )
 }

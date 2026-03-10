@@ -16,10 +16,10 @@ export function DailyVerse() {
 
   if (loading) {
     return (
-      <div className="rounded-xl border border-amber-100 bg-gradient-to-br from-amber-50 to-warm-100 p-5 animate-pulse">
-        <div className="h-4 w-24 bg-amber-200/50 rounded mb-3" />
-        <div className="h-3 w-full bg-amber-200/30 rounded mb-2" />
-        <div className="h-3 w-3/4 bg-amber-200/30 rounded" />
+      <div className="border border-gold/[0.08] bg-surface p-5 animate-pulse">
+        <div className="h-4 w-24 bg-gold/10 mb-3" />
+        <div className="h-3 w-full bg-gold/[0.05] mb-2" />
+        <div className="h-3 w-3/4 bg-gold/[0.05]" />
       </div>
     )
   }
@@ -27,27 +27,27 @@ export function DailyVerse() {
   if (!entry) return null
 
   return (
-    <div className="rounded-xl border border-amber-100 bg-gradient-to-br from-amber-50 to-warm-100 p-5">
+    <div className="border border-gold/[0.12] bg-gold/[0.03] p-5">
       <div className="flex items-center gap-2 mb-3">
-        <BookOpen className="w-4 h-4 text-amber-700" />
-        <span className="text-xs font-semibold text-amber-800 uppercase tracking-wider">Word for Today</span>
+        <BookOpen className="w-4 h-4 text-gold" />
+        <span className="text-[0.55rem] font-display tracking-[0.3em] text-gold uppercase">Word for Today</span>
       </div>
       <div className="space-y-2.5">
         <div className="flex items-baseline gap-2">
-          <span className="text-lg font-semibold text-stone-900">{entry.term}</span>
+          <span className="font-serif text-2xl text-gold">{entry.term}</span>
           {entry.original_script && (
-            <span className="text-base text-amber-700 font-medium">{entry.original_script}</span>
+            <span className="font-serif text-lg text-cream">{entry.original_script}</span>
           )}
         </div>
         {entry.phonetic && (
-          <p className="text-xs text-stone-500 italic">{entry.phonetic}</p>
+          <p className="text-xs text-cream/[0.28] italic font-serif">{entry.phonetic}</p>
         )}
-        <p className="text-sm text-stone-700 leading-relaxed">{entry.plain_meaning}</p>
+        <p className="text-sm text-cream/[0.4] leading-relaxed">{entry.plain_meaning}</p>
         {entry.theological_note && (
-          <p className="text-xs text-stone-500 leading-relaxed italic">{entry.theological_note}</p>
+          <p className="text-xs text-cream/[0.28] leading-relaxed italic">{entry.theological_note}</p>
         )}
         {entry.verse_reference && (
-          <p className="text-xs font-medium text-amber-700 pt-1">{entry.verse_reference}</p>
+          <p className="text-[0.55rem] font-display tracking-[0.2em] text-gold/50 uppercase pt-1">{entry.verse_reference}</p>
         )}
       </div>
     </div>

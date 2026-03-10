@@ -19,7 +19,7 @@ export function TranscriptPanel({ messages, loading, partialText }: TranscriptPa
   if (loading) {
     return (
       <div className="flex-1 flex items-center justify-center">
-        <p className="text-sm text-stone-400">Loading conversation…</p>
+        <p className="text-sm text-cream/[0.28]">Loading conversation...</p>
       </div>
     )
   }
@@ -27,26 +27,25 @@ export function TranscriptPanel({ messages, loading, partialText }: TranscriptPa
   if (messages.length === 0 && !partialText) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center text-center px-6 py-12">
-        <p className="text-sm text-stone-400 leading-relaxed max-w-xs">
+        <p className="text-sm text-cream/[0.28] leading-relaxed max-w-xs font-serif text-base">
           Begin a session to start a conversation with Eliana.
-          <br />
-          Your transcript will appear here.
         </p>
       </div>
     )
   }
 
   return (
-    <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
+    <div className="flex-1 overflow-y-auto px-6 py-6 flex flex-col gap-4">
       {messages.map((msg) => (
         <TranscriptMessage key={msg.id} message={msg} />
       ))}
       {partialText && (
-        <div className="flex justify-start">
-          <div className="max-w-[80%] bg-amber-50 border border-amber-100 rounded-2xl rounded-tl-sm px-4 py-3">
-            <p className="text-sm text-stone-700 leading-relaxed">
+        <div className="animate-msg-in">
+          <div className="text-[0.55rem] font-display tracking-[0.25em] uppercase text-gold px-2 mb-1">Eliana</div>
+          <div className="bg-gold/[0.07] border border-gold/[0.14] rounded-tl-none rounded-tr-lg rounded-br-lg rounded-bl-lg px-4 py-3 max-w-[88%]">
+            <p className="font-serif text-base text-cream leading-[1.65]">
               {partialText}
-              <span className="inline-block w-1 h-3.5 bg-amber-400 ml-0.5 animate-pulse rounded-sm" />
+              <span className="inline-block w-1 h-3.5 bg-gold ml-0.5 animate-pulse rounded-sm" />
             </p>
           </div>
         </div>
@@ -60,17 +59,28 @@ function TranscriptMessage({ message }: { message: Message }) {
   const isUser = message.role === 'user'
 
   return (
-    <div className={cn('flex', isUser ? 'justify-end' : 'justify-start')}>
+    <div className="animate-msg-in flex flex-col gap-1">
       <div className={cn(
-        'max-w-[80%] rounded-2xl px-4 py-3 space-y-1',
-        isUser
-          ? 'bg-stone-800 text-white rounded-tr-sm'
-          : 'bg-amber-50 border border-amber-100 text-stone-800 rounded-tl-sm'
+        'text-[0.55rem] font-display tracking-[0.25em] uppercase px-2',
+        isUser ? 'text-cream/[0.28] text-right' : 'text-gold'
       )}>
-        <p className="text-sm leading-relaxed">{message.content}</p>
-        <p className={cn('text-xs', isUser ? 'text-stone-400' : 'text-stone-400')}>
-          {formatTime(message.created_at)}
-        </p>
+        {isUser ? 'You' : 'Eliana'}
+      </div>
+
+      <div className={cn(
+        'px-4 py-3 text-[0.88rem] leading-[1.65] max-w-[88%]',
+        isUser
+          ? 'bg-cream/[0.05] border border-cream/[0.08] rounded-tl-lg rounded-tr-none rounded-br-lg rounded-bl-lg self-end text-right text-cream/[0.65]'
+          : 'bg-gold/[0.07] border border-gold/[0.14] rounded-tl-none rounded-tr-lg rounded-br-lg rounded-bl-lg self-start text-cream font-serif text-base'
+      )}>
+        {message.content}
+      </div>
+
+      <div className={cn(
+        'text-[0.65rem] text-cream/[0.28] px-2',
+        isUser && 'text-right'
+      )}>
+        {formatTime(message.created_at)}
       </div>
     </div>
   )

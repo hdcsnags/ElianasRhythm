@@ -9,21 +9,21 @@ interface BadgeProps {
 }
 
 export function Badge({ variant = 'default', size = 'sm', children, className }: BadgeProps) {
-  const base = 'inline-flex items-center font-medium rounded-full'
+  const base = 'inline-flex items-center font-display tracking-[0.15em] uppercase border'
 
   const variants = {
-    default: 'bg-stone-100 text-stone-600',
-    amber: 'bg-amber-100 text-amber-800',
-    sage: 'bg-emerald-100 text-emerald-800',
-    prototype: 'bg-sky-100 text-sky-700',
-    soon: 'bg-stone-100 text-stone-500',
-    active: 'bg-emerald-100 text-emerald-700',
-    error: 'bg-red-100 text-red-700',
+    default: 'border-cream/10 text-cream/[0.28]',
+    amber: 'border-gold/30 text-gold',
+    sage: 'border-emerald-500/30 text-emerald-400',
+    prototype: 'border-cream/[0.28] text-cream/[0.28]',
+    soon: 'border-cream/10 text-cream/[0.15]',
+    active: 'border-emerald-500/30 text-emerald-400',
+    error: 'border-danger/30 text-danger',
   }
 
   const sizes = {
-    sm: 'text-xs px-2 py-0.5',
-    md: 'text-sm px-2.5 py-1',
+    sm: 'text-[0.55rem] px-2 py-0.5',
+    md: 'text-xs px-2.5 py-1',
   }
 
   return (

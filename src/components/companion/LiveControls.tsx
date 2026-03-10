@@ -1,5 +1,4 @@
-import { Mic, MicOff, PhoneOff, Phone, Pause, MessageSquare } from 'lucide-react'
-import { Button } from '../ui/Button'
+import { Mic, MicOff, Pause, X } from 'lucide-react'
 import { cn } from '../../lib/utils'
 import type { LiveSessionState } from '../../services/live'
 
@@ -23,86 +22,69 @@ export function LiveControls({
   onHolyPause,
 }: LiveControlsProps) {
   const isIdle = state === 'idle' || state === 'disconnected'
-  const isActive = !isIdle && state !== 'error'
   const isConnecting = state === 'connecting'
-  const isError = state === 'error'
   const isSpeaking = state === 'speaking'
 
-  return (
-    <div className="flex flex-col items-center gap-4">
-      {isFallback && isActive && (
-        <div className="flex items-center gap-2 text-xs text-amber-700 bg-amber-50 px-3 py-1.5 rounded-full border border-amber-200">
-          <MessageSquare className="w-3 h-3" />
-          Text mode -- use the input below to chat with Eliana
-        </div>
-      )}
-
-      {isError && (
-        <div className="flex flex-col items-center gap-2">
-          <p className="text-sm text-red-600">Connection lost. You can reconnect or continue via text.</p>
-        </div>
-      )}
-
-      <div className="flex items-center gap-3">
-        {isIdle || isError ? (
-          <Button
-            variant="primary"
-            size="lg"
-            onClick={onConnect}
-            loading={isConnecting}
-            className="rounded-full px-8"
-          >
-            <Phone className="w-4 h-4" />
-            {isError ? 'Reconnect' : 'Begin Session'}
-          </Button>
-        ) : (
-          <>
-            <button
-              onClick={onToggleMic}
-              disabled={isConnecting || isFallback}
-              className={cn(
-                'w-12 h-12 rounded-full flex items-center justify-center transition-all duration-200',
-                'focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-600',
-                isFallback
-                  ? 'bg-stone-100 text-stone-300 cursor-not-allowed'
-                  : isMicActive
-                    ? 'bg-amber-700 text-white hover:bg-amber-800 shadow-lg shadow-amber-700/20'
-                    : 'bg-stone-200 text-stone-600 hover:bg-stone-300'
-              )}
-              title={isFallback ? 'Mic unavailable in text mode' : isMicActive ? 'Mute mic' : 'Unmute mic'}
-            >
-              {isMicActive && !isFallback ? <Mic className="w-5 h-5" /> : <MicOff className="w-5 h-5" />}
-            </button>
-
-            <button
-              onClick={onHolyPause}
-              disabled={!isSpeaking}
-              className={cn(
-                'w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200',
-                'focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-stone-400',
-                isSpeaking
-                  ? 'bg-amber-100 text-amber-700 hover:bg-amber-200'
-                  : 'bg-stone-100 text-stone-300 cursor-not-allowed'
-              )}
-              title="Holy Pause"
-            >
-              <Pause className="w-4 h-4" />
-            </button>
-
-            <button
-              onClick={onDisconnect}
-              className={cn(
-                'w-12 h-12 rounded-full flex items-center justify-center transition-all duration-200',
-                'bg-red-50 text-red-500 hover:bg-red-100 hover:text-red-600',
-                'focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500'
-              )}
-              title="End session"
-            >
-              <PhoneOff className="w-5 h-5" />
-            </button>
-          </>
-        )}
+  if (isIdle || state === 'error') {
+    return (
+      <div className="flex items-center gap-5">
+        <button
+          onClick={onConnect}
+          disabled={isConnecting}
+          className="w-16 h-16 rounded-full border border-gold/[0.35] bg-transparent flex items-center justify-center text-gold text-[1.3rem] transition-all duration-250 hover:bg-gold hover:text-night hover:shadow-[0_0_30px_rgba(201,168,76,0.4)] disabled:opacity-50"
+        >
+          {isConnecting ? (
+            <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24" fill="none">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+            </svg>
+          ) : (
+            <Mic className="w-6 h-6" />
+          )}
+        </button>
       </div>
+    )
+  }
+
+  return (
+    <div className="flex items-center gap-5">
+      <button
+        onClick={onHolyPause}
+        disabled={!isSpeaking}
+        className={cn(
+          'w-12 h-12 rounded-full border flex items-center justify-center transition-all duration-250 outline-none',
+          isSpeaking
+            ? 'border-gold/20 text-cream/[0.28] hover:border-gold hover:text-gold hover:bg-gold/[0.12]'
+            : 'border-cream/10 text-cream/10 cursor-not-allowed'
+        )}
+        title="Pause"
+      >
+        <Pause className="w-4 h-4" />
+      </button>
+
+      <button
+        onClick={onToggleMic}
+        disabled={isFallback}
+        className={cn(
+          'w-16 h-16 rounded-full flex items-center justify-center transition-all duration-250 outline-none',
+          isFallback
+            ? 'border border-cream/10 text-cream/10 cursor-not-allowed'
+            : isMicActive
+              ? 'bg-gold border-gold text-night shadow-[0_0_20px_rgba(201,168,76,0.3)]'
+              : 'border border-gold/20 text-cream/[0.28] hover:border-gold hover:text-gold hover:bg-gold/[0.12]'
+        )}
+        title={isMicActive ? 'Mute' : 'Unmute'}
+      >
+        {isMicActive && !isFallback ? <Mic className="w-6 h-6" /> : <MicOff className="w-6 h-6" />}
+      </button>
+
+      <button
+        onClick={onDisconnect}
+        className="w-12 h-12 rounded-full border border-danger/30 text-danger/60 flex items-center justify-center transition-all duration-250 outline-none hover:border-danger hover:text-danger hover:bg-danger/10"
+        title="End Session"
+      >
+        <X className="w-4 h-4" />
+      </button>
     </div>
   )
 }

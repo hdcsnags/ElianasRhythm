@@ -12,7 +12,7 @@ import PrayerPage from './pages/PrayerPage'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth()
-  if (loading) return <PageLoader label="Waking up…" />
+  if (loading) return <PageLoader />
   if (!user) return <Navigate to="/auth" replace />
   return <>{children}</>
 }

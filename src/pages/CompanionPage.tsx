@@ -1,17 +1,16 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Info } from 'lucide-react'
 import { CompanionOrb } from '../components/companion/CompanionOrb'
 import { LiveControls } from '../components/companion/LiveControls'
 import { TranscriptPanel } from '../components/companion/TranscriptPanel'
-import { ExplainabilityPanel } from '../components/session/ExplainabilityPanel'
-import { SessionMetadata } from '../components/session/SessionMetadata'
+import { StarField } from '../components/companion/StarField'
+import { Waveform } from '../components/companion/Waveform'
+
 import { LoadingSpinner } from '../components/ui/LoadingSpinner'
 import { useLive } from '../hooks/useLive'
 import { useMessages } from '../hooks/useMessages'
 import { useSessions } from '../hooks/useSessions'
 import { useAuth } from '../hooks/useAuth'
-import { useExplainability } from '../hooks/useExplainability'
 import { getSession } from '../services/sessions'
 import { addMessage, getMaxSequenceIndex } from '../services/messages'
 import { liveService } from '../services/live'
@@ -28,12 +27,10 @@ export default function CompanionPage() {
   const [session, setSession] = useState<Session | null>(null)
   const [sessionLoading, setSessionLoading] = useState(true)
   const [partialText, setPartialText] = useState<string | undefined>()
-  const [showSidebar, setShowSidebar] = useState(false)
   const [textSending, setTextSending] = useState(false)
+  const [timer, setTimer] = useState(0)
 
   const { messages, loading: messagesLoading, sendMessage, appendMessage } = useMessages(session?.id)
-  const { entries: explainEntries } = useExplainability(session?.id)
-
   const handleLiveEvent = useCallback((event: LiveStreamEvent) => {
     if (!session || !user) return
     if (event.type === 'transcript_partial') {
@@ -55,6 +52,12 @@ export default function CompanionPage() {
   }, [session, user, appendMessage])
 
   const live = useLive({ onTranscriptEvent: handleLiveEvent })
+
+  useEffect(() => {
+    if (!live.isActive) return
+    const interval = setInterval(() => setTimer(t => t + 1), 1000)
+    return () => clearInterval(interval)
+  }, [live.isActive])
 
   useEffect(() => {
     async function loadOrCreate() {
@@ -85,6 +88,7 @@ export default function CompanionPage() {
 
   const handleConnect = useCallback(() => {
     if (!session || !user) return
+    setTimer(0)
     live.connect({
       sessionId: session.id,
       userId: user.id,
@@ -139,9 +143,16 @@ export default function CompanionPage() {
     }
   }
 
+  const formatTimer = (s: number) => {
+    const h = Math.floor(s / 3600).toString().padStart(2, '0')
+    const m = Math.floor((s % 3600) / 60).toString().padStart(2, '0')
+    const sec = (s % 60).toString().padStart(2, '0')
+    return `${h}:${m}:${sec}`
+  }
+
   if (sessionLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="h-full flex items-center justify-center bg-night">
         <LoadingSpinner size="lg" label="Preparing your space..." />
       </div>
     )
@@ -149,10 +160,10 @@ export default function CompanionPage() {
 
   if (!session) {
     return (
-      <div className="min-h-screen flex items-center justify-center px-4">
+      <div className="h-full flex items-center justify-center bg-night px-4">
         <div className="text-center">
-          <p className="text-stone-600 mb-4">Unable to load session.</p>
-          <button onClick={() => navigate('/')} className="text-amber-700 text-sm hover:text-amber-800">
+          <p className="text-cream/[0.28] mb-4">Unable to load session.</p>
+          <button onClick={() => navigate('/')} className="text-gold text-sm hover:text-gold-soft transition-colors">
             Return home
           </button>
         </div>
@@ -161,69 +172,71 @@ export default function CompanionPage() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen">
-      <header className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-stone-200 bg-white">
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => navigate('/')}
-            className="text-stone-400 hover:text-stone-700 transition-colors"
-          >
-            <ArrowLeft className="w-5 h-5" />
-          </button>
-          <div>
-            <h1 className="text-sm font-semibold text-stone-800">Companion Session</h1>
-            <p className="text-xs text-stone-400">
-              {session.status === 'active' ? 'In progress' : 'Completed'}
-            </p>
-          </div>
-        </div>
-        <button
-          onClick={() => setShowSidebar(prev => !prev)}
-          className="text-stone-400 hover:text-stone-700 transition-colors"
-          title="Session info"
-        >
-          <Info className="w-5 h-5" />
-        </button>
-      </header>
+    <div className="h-full grid grid-cols-1 lg:grid-cols-[1fr_340px]">
+      <div className="relative flex flex-col items-center justify-center overflow-hidden bg-night">
+        <div className="absolute inset-0 pointer-events-none" style={{
+          background: 'radial-gradient(ellipse 70% 60% at 50% 45%, rgba(201,168,76,0.045) 0%, transparent 65%), radial-gradient(ellipse 40% 40% at 20% 80%, rgba(100,60,20,0.06) 0%, transparent 55%), radial-gradient(ellipse 30% 30% at 80% 15%, rgba(201,168,76,0.025) 0%, transparent 50%)'
+        }} />
+        <StarField />
 
-      <div className="flex flex-1 overflow-hidden">
-        <div className="flex flex-col flex-1 overflow-hidden">
-          <div className="flex flex-col items-center py-8 px-4 gap-6 border-b border-stone-100 bg-stone-50/50">
-            <CompanionOrb state={live.state} size="md" />
-            <LiveControls
-              state={live.state}
-              isMicActive={live.isMicActive}
-              isFallback={live.isFallback}
-              onConnect={handleConnect}
-              onDisconnect={handleDisconnect}
-              onToggleMic={live.toggleMic}
-              onHolyPause={live.triggerHolyPause}
-            />
-          </div>
-
-          <div className="flex flex-col flex-1 overflow-hidden">
-            <TranscriptPanel
-              messages={messages}
-              loading={messagesLoading}
-              partialText={partialText}
-            />
-
-            {session.status === 'active' && (
-              <TextInputBar onSend={handleSendText} disabled={live.isConnecting || textSending} sending={textSending} />
-            )}
-          </div>
+        <div className="absolute top-6 left-6 flex flex-col gap-1 z-10">
+          <div className="font-serif text-base text-cream">Companion Session</div>
+          <div className="text-[0.7rem] text-cream/[0.28] tracking-wide">{user?.email}</div>
+          {live.isActive && (
+            <div className="font-display text-[0.65rem] text-gold tracking-[0.2em] mt-1">
+              {formatTimer(timer)}
+            </div>
+          )}
         </div>
 
-        {showSidebar && (
-          <aside className="w-72 border-l border-stone-200 bg-white p-4 space-y-4 overflow-y-auto hidden lg:block">
-            <SessionMetadata session={session} messageCount={messages.length} />
-            <ExplainabilityPanel
-              entries={explainEntries}
-              isPlaceholder={explainEntries.length === 0 && messages.length > 0}
-            />
-          </aside>
-        )}
+        <CompanionOrb state={live.state} />
+
+        <div className="mt-2">
+          <Waveform
+            visible={live.state === 'listening' || live.state === 'speaking'}
+            speaking={live.state === 'speaking'}
+          />
+        </div>
+
+        <div className="mt-4">
+          <LiveControls
+            state={live.state}
+            isMicActive={live.isMicActive}
+            isFallback={live.isFallback}
+            onConnect={handleConnect}
+            onDisconnect={handleDisconnect}
+            onToggleMic={live.toggleMic}
+            onHolyPause={live.triggerHolyPause}
+          />
+        </div>
       </div>
+
+      <aside className="hidden lg:flex flex-col bg-deep border-l border-gold/[0.08] overflow-hidden">
+        <div className="px-6 py-5 border-b border-gold/[0.08] flex items-center justify-between shrink-0">
+          <div className="font-display text-[0.6rem] tracking-[0.3em] text-gold uppercase">Transcript</div>
+          <div className="text-[0.7rem] text-cream/[0.28] flex items-center gap-1.5">
+            <div className="w-1.5 h-1.5 rounded-full bg-gold animate-mode-pulse" />
+            Companion
+          </div>
+        </div>
+
+        <TranscriptPanel
+          messages={messages}
+          loading={messagesLoading}
+          partialText={partialText}
+        />
+
+        <div className="px-6 py-4 border-t border-gold/[0.08] shrink-0">
+          {session.status === 'active' && (
+            <TextInputBar onSend={handleSendText} disabled={live.isConnecting || textSending} sending={textSending} />
+          )}
+          {session.status !== 'active' && (
+            <p className="text-[0.72rem] text-cream/[0.28] text-center leading-relaxed">
+              Eliana honors silence. If you pause, she waits.
+            </p>
+          )}
+        </div>
+      </aside>
     </div>
   )
 }
@@ -239,21 +252,21 @@ function TextInputBar({ onSend, disabled, sending }: { onSend: (text: string) =>
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex items-center gap-2 px-4 py-3 border-t border-stone-200 bg-white">
+    <form onSubmit={handleSubmit} className="flex items-center gap-2">
       <input
         type="text"
         value={value}
         onChange={e => setValue(e.target.value)}
         placeholder="Write to Eliana..."
         disabled={disabled}
-        className="flex-1 px-3 py-2 rounded-lg border border-stone-200 focus:border-amber-400 focus:ring-1 focus:ring-amber-400 text-sm outline-none transition-colors disabled:opacity-50"
+        className="flex-1 px-3 py-2 bg-transparent border border-gold/[0.15] text-cream text-sm outline-none transition-colors focus:border-gold/40 disabled:opacity-50 placeholder:text-cream/[0.2]"
       />
       <button
         type="submit"
         disabled={!value.trim() || disabled}
-        className="px-4 py-2 bg-amber-700 hover:bg-amber-800 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+        className="px-4 py-2 bg-gold/[0.12] border border-gold/20 text-gold text-xs font-display tracking-[0.15em] uppercase transition-colors hover:bg-gold/20 disabled:opacity-30 disabled:cursor-not-allowed"
       >
-        {sending ? 'Thinking...' : 'Send'}
+        {sending ? '...' : 'Send'}
       </button>
     </form>
   )

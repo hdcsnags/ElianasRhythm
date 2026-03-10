@@ -1,125 +1,115 @@
-import { useEffect, useRef } from 'react'
 import { cn } from '../../lib/utils'
 import type { LiveSessionState } from '../../services/live'
 
 interface CompanionOrbProps {
   state: LiveSessionState
-  size?: 'sm' | 'md' | 'lg'
+  onClick?: () => void
 }
 
 const stateConfig: Record<LiveSessionState, {
   label: string
-  gradient: string
-  glow: string
-  animate: 'none' | 'breathe' | 'pulse' | 'wave'
+  innerStyle: string
+  shadowStyle: string
+  animation: string
+  ringAnimation: string
+  labelColor: string
 }> = {
   idle: {
     label: 'Ready',
-    gradient: 'from-amber-100 to-amber-200',
-    glow: 'shadow-amber-200/40',
-    animate: 'none',
+    innerStyle: 'bg-gradient-to-br from-[#C4B89A] via-[#8A7A5A] to-[#4A3C20]',
+    shadowStyle: 'shadow-[0_0_30px_rgba(150,130,80,0.2),0_0_60px_rgba(150,130,80,0.05)]',
+    animation: 'animate-orb-breathe',
+    ringAnimation: 'opacity-30',
+    labelColor: 'text-cream/[0.28]',
   },
   connecting: {
     label: 'Connecting',
-    gradient: 'from-amber-200 to-amber-300',
-    glow: 'shadow-amber-300/50',
-    animate: 'pulse',
+    innerStyle: 'bg-gradient-to-br from-[#D4B06A] via-[#C9A84C] to-[#8B6520]',
+    shadowStyle: 'shadow-[0_0_40px_rgba(201,168,76,0.3),0_0_80px_rgba(201,168,76,0.1)]',
+    animation: 'animate-orb-pulse',
+    ringAnimation: 'animate-ring-spin opacity-50 border-dashed',
+    labelColor: 'text-gold',
   },
   listening: {
     label: 'Listening',
-    gradient: 'from-amber-300 to-amber-500',
-    glow: 'shadow-amber-400/60',
-    animate: 'breathe',
+    innerStyle: 'bg-gradient-to-br from-[#F0D878] via-[#D4B040] via-[#C9A84C] to-[#8B6520]',
+    shadowStyle: 'shadow-[0_0_60px_rgba(201,168,76,0.5),0_0_120px_rgba(201,168,76,0.2)]',
+    animation: 'animate-orb-listen',
+    ringAnimation: 'animate-ring-pulse',
+    labelColor: 'text-gold-soft',
   },
   speaking: {
     label: 'Speaking',
-    gradient: 'from-amber-400 to-amber-600',
-    glow: 'shadow-amber-500/70',
-    animate: 'wave',
+    innerStyle: 'bg-gradient-to-br from-[#FFE89A] via-[#E8C840] via-[#C9A84C] to-[#9B7830]',
+    shadowStyle: 'shadow-[0_0_80px_rgba(220,190,60,0.6),0_0_160px_rgba(201,168,76,0.25)]',
+    animation: 'animate-orb-speak',
+    ringAnimation: 'animate-ring-pulse border-gold/20',
+    labelColor: 'text-[#FFE89A]',
   },
   paused: {
     label: 'Paused',
-    gradient: 'from-stone-200 to-stone-300',
-    glow: 'shadow-stone-300/30',
-    animate: 'none',
+    innerStyle: 'bg-gradient-to-br from-[#C4B89A] via-[#8A7A5A] to-[#4A3C20]',
+    shadowStyle: 'shadow-[0_0_30px_rgba(150,130,80,0.2)]',
+    animation: '',
+    ringAnimation: 'opacity-30',
+    labelColor: 'text-cream/[0.28]',
   },
   error: {
-    label: 'Error',
-    gradient: 'from-red-200 to-red-400',
-    glow: 'shadow-red-300/40',
-    animate: 'none',
+    label: 'Connection Error',
+    innerStyle: 'bg-gradient-to-br from-[#D4806A] via-[#C0524A] to-[#802820]',
+    shadowStyle: 'shadow-[0_0_40px_rgba(192,82,74,0.4),0_0_80px_rgba(192,82,74,0.1)]',
+    animation: 'animate-orb-breathe',
+    ringAnimation: 'border-danger/30',
+    labelColor: 'text-[#E07870]',
   },
   disconnected: {
-    label: 'Disconnected',
-    gradient: 'from-stone-100 to-stone-200',
-    glow: 'shadow-stone-200/20',
-    animate: 'none',
+    label: 'Ready',
+    innerStyle: 'bg-gradient-to-br from-[#C4B89A] via-[#8A7A5A] to-[#4A3C20]',
+    shadowStyle: 'shadow-[0_0_30px_rgba(150,130,80,0.2),0_0_60px_rgba(150,130,80,0.05)]',
+    animation: 'animate-orb-breathe',
+    ringAnimation: 'opacity-30',
+    labelColor: 'text-cream/[0.28]',
   },
 }
 
-const sizes = {
-  sm: { container: 'w-20 h-20', orb: 'w-16 h-16', inner: 'w-8 h-8' },
-  md: { container: 'w-36 h-36', orb: 'w-28 h-28', inner: 'w-14 h-14' },
-  lg: { container: 'w-48 h-48', orb: 'w-40 h-40', inner: 'w-20 h-20' },
-}
-
-export function CompanionOrb({ state, size = 'md' }: CompanionOrbProps) {
+export function CompanionOrb({ state, onClick }: CompanionOrbProps) {
   const config = stateConfig[state]
-  const s = sizes[size]
-  const prevState = useRef(state)
-
-  useEffect(() => {
-    prevState.current = state
-  }, [state])
-
-  const animClass =
-    config.animate === 'breathe' ? 'animate-orb-breathe' :
-    config.animate === 'pulse' ? 'animate-orb-pulse' :
-    config.animate === 'wave' ? 'animate-orb-wave' : ''
 
   return (
-    <div className="flex flex-col items-center gap-3">
-      <div className={cn('relative flex items-center justify-center', s.container)}>
-        {config.animate !== 'none' && (
-          <div className={cn(
-            'absolute rounded-full bg-gradient-to-br opacity-20',
-            config.gradient,
-            s.orb,
-            config.animate === 'wave' ? 'animate-ping' : 'animate-pulse'
-          )} style={{ animationDuration: config.animate === 'wave' ? '2s' : '3s' }} />
-        )}
-
-        {config.animate === 'wave' && (
-          <div className={cn(
-            'absolute rounded-full bg-gradient-to-br opacity-10',
-            config.gradient,
-            s.orb,
-            'animate-ping'
-          )} style={{ animationDuration: '3s', animationDelay: '0.5s' }} />
-        )}
-
+    <div className="flex flex-col items-center">
+      <div className="relative flex items-center justify-center mb-6">
         <div className={cn(
-          'relative rounded-full bg-gradient-to-br flex items-center justify-center',
-          'shadow-xl transition-all duration-700 ease-in-out',
-          config.gradient,
-          config.glow,
-          s.orb,
-          animClass
-        )}>
+          'absolute w-[180px] h-[180px] rounded-full border border-gold/10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2',
+          config.ringAnimation
+        )} />
+        <div className={cn(
+          'absolute w-[230px] h-[230px] rounded-full border border-gold/[0.06] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2',
+          config.ringAnimation
+        )} style={{ animationDelay: '0.5s' }} />
+        <div className={cn(
+          'absolute w-[290px] h-[290px] rounded-full border border-gold/[0.03] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2',
+          config.ringAnimation
+        )} style={{ animationDelay: '1s' }} />
+
+        <div
+          className="w-[130px] h-[130px] rounded-full relative z-[2] cursor-pointer transition-transform duration-400 hover:scale-[1.03]"
+          onClick={onClick}
+        >
           <div className={cn(
-            'rounded-full bg-white/30 backdrop-blur-sm transition-all duration-700',
-            s.inner,
-            config.animate === 'wave' && 'animate-orb-inner-wave'
+            'w-full h-full rounded-full transition-all duration-600 ease-in-out',
+            config.innerStyle,
+            config.shadowStyle,
+            config.animation
           )} />
         </div>
       </div>
 
-      <span className={cn(
-        'text-xs font-medium tracking-widest uppercase transition-all duration-500',
-        state === 'error' ? 'text-red-500' : 'text-stone-400'
+      <div className={cn(
+        'font-display text-[0.62rem] tracking-[0.35em] uppercase transition-colors duration-400 h-5',
+        config.labelColor
       )}>
         {config.label}
-      </span>
+      </div>
     </div>
   )
 }

@@ -14,7 +14,7 @@ interface SessionListProps {
 
 export function SessionList({ sessions, loading, error, onSelect, onRetry }: SessionListProps) {
   if (loading) {
-    return <LoadingSpinner className="py-16" label="Loading sessions…" />
+    return <LoadingSpinner className="py-16" label="Loading sessions..." />
   }
 
   if (error) {

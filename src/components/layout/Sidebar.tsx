@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from 'react-router-dom'
-import { Bird, ScrollText, Settings, LogOut } from 'lucide-react'
+import { Bird, ScrollText, Heart, Settings, LogOut } from 'lucide-react'
 import { useAuth } from '../../hooks/useAuth'
 import { cn } from '../../lib/utils'
 
@@ -12,6 +12,7 @@ interface NavItem {
 const navItems: NavItem[] = [
   { to: '/companion', icon: Bird, label: 'Companion' },
   { to: '/history', icon: ScrollText, label: 'History' },
+  { to: '/prayers', icon: Heart, label: 'Prayers' },
   { to: '/settings', icon: Settings, label: 'Settings' },
 ]
 

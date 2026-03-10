@@ -1,0 +1,1132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Eliana — God Has Answered</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Sans:wght@300;400;500&family=Cinzel:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --night: #0D0D14;
+    --deep: #13131E;
+    --surface: #1A1A2A;
+    --gold: #C9A84C;
+    --gold-soft: #D4B96A;
+    --gold-dim: rgba(201,168,76,0.15);
+    --cream: #F5EFE0;
+    --mist: rgba(245,239,224,0.6);
+    --stone: rgba(245,239,224,0.3);
+    --glow: rgba(201,168,76,0.08);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--night);
+    color: var(--cream);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    overflow-x: hidden;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    padding: 4rem 2rem;
+  }
+
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 50% at 50% 40%, rgba(201,168,76,0.06) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 60% at 20% 80%, rgba(139,90,43,0.08) 0%, transparent 60%),
+      radial-gradient(ellipse 30% 40% at 80% 20%, rgba(201,168,76,0.04) 0%, transparent 50%);
+  }
+
+  .star-field {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+  }
+
+  .star {
+    position: absolute;
+    width: 2px;
+    height: 2px;
+    background: var(--cream);
+    border-radius: 50%;
+    animation: twinkle var(--dur) ease-in-out infinite;
+    opacity: 0;
+  }
+
+  @keyframes twinkle {
+    0%, 100% { opacity: 0; }
+    50% { opacity: var(--max-op); }
+  }
+
+  .eyebrow {
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.35em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 2rem;
+    opacity: 0;
+    animation: fadeUp 1s ease forwards 0.3s;
+  }
+
+  .hero-orb-wrap {
+    position: relative;
+    margin-bottom: 2.5rem;
+    opacity: 0;
+    animation: fadeUp 1.2s ease forwards 0.5s;
+  }
+
+  .orb-ring {
+    position: absolute;
+    border-radius: 50%;
+    border: 1px solid rgba(201,168,76,0.15);
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    animation: ringPulse 4s ease-in-out infinite;
+  }
+
+  .orb-ring:nth-child(1) { width: 200px; height: 200px; animation-delay: 0s; }
+  .orb-ring:nth-child(2) { width: 260px; height: 260px; animation-delay: 0.8s; border-color: rgba(201,168,76,0.08); }
+  .orb-ring:nth-child(3) { width: 320px; height: 320px; animation-delay: 1.6s; border-color: rgba(201,168,76,0.04); }
+
+  @keyframes ringPulse {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+    50% { transform: translate(-50%, -50%) scale(1.05); opacity: 0.6; }
+  }
+
+  .orb {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%,
+      #E8C96A 0%,
+      #C9A84C 30%,
+      #A07830 60%,
+      #6B4E20 100%);
+    box-shadow:
+      0 0 60px rgba(201,168,76,0.4),
+      0 0 120px rgba(201,168,76,0.15),
+      inset 0 0 30px rgba(255,255,255,0.1);
+    animation: orbBreathe 4s ease-in-out infinite;
+    position: relative;
+    z-index: 1;
+  }
+
+  @keyframes orbBreathe {
+    0%, 100% { transform: scale(1); box-shadow: 0 0 60px rgba(201,168,76,0.4), 0 0 120px rgba(201,168,76,0.15), inset 0 0 30px rgba(255,255,255,0.1); }
+    50% { transform: scale(1.04); box-shadow: 0 0 80px rgba(201,168,76,0.55), 0 0 160px rgba(201,168,76,0.2), inset 0 0 40px rgba(255,255,255,0.15); }
+  }
+
+  .hero-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(4rem, 10vw, 8rem);
+    font-weight: 300;
+    letter-spacing: 0.05em;
+    line-height: 1;
+    text-align: center;
+    margin-bottom: 0.5rem;
+    opacity: 0;
+    animation: fadeUp 1.2s ease forwards 0.7s;
+    background: linear-gradient(180deg, var(--cream) 0%, rgba(245,239,224,0.7) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero-subtitle {
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 2rem;
+    opacity: 0;
+    animation: fadeUp 1.2s ease forwards 0.9s;
+  }
+
+  .hero-tagline {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+    color: var(--mist);
+    text-align: center;
+    max-width: 600px;
+    line-height: 1.6;
+    margin-bottom: 3rem;
+    opacity: 0;
+    animation: fadeUp 1.2s ease forwards 1.1s;
+  }
+
+  .hero-cta {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    opacity: 0;
+    animation: fadeUp 1.2s ease forwards 1.3s;
+  }
+
+  .btn-primary {
+    padding: 0.85rem 2.5rem;
+    background: linear-gradient(135deg, var(--gold) 0%, #A07830 100%);
+    color: var(--night);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-primary::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(255,255,255,0.1);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .btn-primary:hover::after { opacity: 1; }
+
+  .btn-secondary {
+    padding: 0.85rem 2.5rem;
+    background: transparent;
+    color: var(--cream);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 400;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border: 1px solid rgba(245,239,224,0.2);
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.3s ease;
+  }
+
+  .btn-secondary:hover {
+    border-color: var(--gold);
+    color: var(--gold);
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── DIVIDER ── */
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 0 2rem;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .divider-line {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(201,168,76,0.3), transparent);
+  }
+
+  .divider-mark {
+    font-family: 'Cinzel', serif;
+    font-size: 0.6rem;
+    letter-spacing: 0.3em;
+    color: var(--gold);
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  /* ── STORY SECTION ── */
+  .section {
+    padding: 8rem 2rem;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .section-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.6rem;
+    letter-spacing: 0.4em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .section-label::after {
+    content: '';
+    flex: 1;
+    max-width: 60px;
+    height: 1px;
+    background: var(--gold);
+    opacity: 0.4;
+  }
+
+  .section-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    font-weight: 300;
+    line-height: 1.15;
+    margin-bottom: 2rem;
+    color: var(--cream);
+  }
+
+  .section-title em {
+    font-style: italic;
+    color: var(--gold-soft);
+  }
+
+  .section-body {
+    font-size: 1.05rem;
+    line-height: 1.85;
+    color: var(--mist);
+    max-width: 680px;
+  }
+
+  .section-body p + p {
+    margin-top: 1.2rem;
+  }
+
+  /* ── STORY QUOTE ── */
+  .story-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6rem;
+    align-items: center;
+  }
+
+  @media (max-width: 768px) {
+    .story-grid { grid-template-columns: 1fr; gap: 3rem; }
+  }
+
+  .pull-quote {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: clamp(1.4rem, 3vw, 2rem);
+    line-height: 1.5;
+    color: var(--cream);
+    border-left: 2px solid var(--gold);
+    padding-left: 2rem;
+    position: relative;
+  }
+
+  .pull-quote::before {
+    content: '\201C';
+    font-size: 5rem;
+    color: var(--gold);
+    opacity: 0.2;
+    position: absolute;
+    top: -1.5rem;
+    left: 1.5rem;
+    font-style: normal;
+    line-height: 1;
+  }
+
+  /* ── MODES ── */
+  .modes-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    gap: 1.5rem;
+    margin-top: 4rem;
+  }
+
+  @media (max-width: 768px) {
+    .modes-grid { grid-template-columns: 1fr; }
+  }
+
+  .mode-card {
+    background: var(--surface);
+    border: 1px solid rgba(201,168,76,0.1);
+    padding: 2.5rem;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.3s ease, transform 0.3s ease;
+  }
+
+  .mode-card:hover {
+    border-color: rgba(201,168,76,0.3);
+    transform: translateY(-3px);
+  }
+
+  .mode-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--gold), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .mode-card:hover::before { opacity: 1; }
+
+  .mode-card.primary {
+    background: linear-gradient(135deg, rgba(201,168,76,0.08) 0%, var(--surface) 100%);
+    border-color: rgba(201,168,76,0.25);
+  }
+
+  .mode-card.primary::before { opacity: 1; }
+
+  .mode-badge {
+    font-family: 'Cinzel', serif;
+    font-size: 0.55rem;
+    letter-spacing: 0.3em;
+    padding: 0.3rem 0.8rem;
+    border: 1px solid currentColor;
+    display: inline-block;
+    margin-bottom: 1.5rem;
+    text-transform: uppercase;
+  }
+
+  .mode-badge.live { color: var(--gold); }
+  .mode-badge.proto { color: var(--stone); }
+  .mode-badge.soon { color: rgba(245,239,224,0.2); }
+
+  .mode-icon {
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+  }
+
+  .mode-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.8rem;
+    font-weight: 400;
+    margin-bottom: 0.75rem;
+    color: var(--cream);
+  }
+
+  .mode-desc {
+    font-size: 0.9rem;
+    line-height: 1.7;
+    color: var(--stone);
+  }
+
+  /* ── THEOLOGY ── */
+  .theology-section {
+    background: var(--deep);
+    padding: 8rem 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .theology-section::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 50% 60% at 50% 50%, rgba(201,168,76,0.04) 0%, transparent 70%);
+  }
+
+  .theology-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .terms-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: rgba(201,168,76,0.1);
+    margin-top: 4rem;
+    border: 1px solid rgba(201,168,76,0.1);
+  }
+
+  @media (max-width: 768px) {
+    .terms-grid { grid-template-columns: 1fr; }
+  }
+
+  .term-card {
+    background: var(--deep);
+    padding: 2.5rem;
+    transition: background 0.3s ease;
+  }
+
+  .term-card:hover {
+    background: rgba(201,168,76,0.05);
+  }
+
+  .term-original {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2rem;
+    font-weight: 300;
+    color: var(--gold);
+    margin-bottom: 0.25rem;
+  }
+
+  .term-name {
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.25em;
+    color: var(--stone);
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+
+  .term-phonetic {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 0.85rem;
+    color: var(--stone);
+    margin-bottom: 1rem;
+  }
+
+  .term-meaning {
+    font-size: 0.9rem;
+    line-height: 1.65;
+    color: var(--mist);
+  }
+
+  .term-ref {
+    font-family: 'Cinzel', serif;
+    font-size: 0.55rem;
+    letter-spacing: 0.2em;
+    color: var(--gold);
+    opacity: 0.6;
+    margin-top: 1rem;
+    text-transform: uppercase;
+  }
+
+  /* ── COMPANION UI MOCKUP ── */
+  .ui-section {
+    padding: 8rem 2rem;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .ui-mockup {
+    margin-top: 4rem;
+    background: var(--surface);
+    border: 1px solid rgba(201,168,76,0.15);
+    overflow: hidden;
+    position: relative;
+  }
+
+  .mockup-bar {
+    background: var(--deep);
+    padding: 0.85rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border-bottom: 1px solid rgba(201,168,76,0.1);
+  }
+
+  .mockup-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: rgba(245,239,224,0.1);
+  }
+
+  .mockup-url {
+    flex: 1;
+    text-align: center;
+    font-size: 0.7rem;
+    color: var(--stone);
+    letter-spacing: 0.05em;
+  }
+
+  .mockup-body {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    min-height: 520px;
+  }
+
+  @media (max-width: 768px) {
+    .mockup-body { grid-template-columns: 1fr; }
+  }
+
+  .mockup-sidebar {
+    background: rgba(13,13,20,0.8);
+    border-right: 1px solid rgba(201,168,76,0.08);
+    padding: 2rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .sidebar-brand {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.4rem;
+    color: var(--cream);
+    margin-bottom: 0.25rem;
+  }
+
+  .sidebar-tagline {
+    font-size: 0.7rem;
+    color: var(--stone);
+    margin-bottom: 2rem;
+    letter-spacing: 0.05em;
+  }
+
+  .sidebar-item {
+    padding: 0.6rem 0.75rem;
+    font-size: 0.8rem;
+    color: var(--stone);
+    cursor: pointer;
+    border-radius: 2px;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .sidebar-item.active {
+    background: var(--gold-dim);
+    color: var(--gold);
+  }
+
+  .sidebar-item-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: 0.5;
+  }
+
+  .mockup-main {
+    padding: 3rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+  }
+
+  .mockup-orb-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .mockup-orb-ring {
+    position: absolute;
+    border-radius: 50%;
+    border: 1px solid rgba(201,168,76,0.12);
+    animation: ringPulse 3s ease-in-out infinite;
+  }
+
+  .mockup-orb-ring:nth-child(1) { width: 130px; height: 130px; }
+  .mockup-orb-ring:nth-child(2) { width: 160px; height: 160px; animation-delay: 0.6s; border-color: rgba(201,168,76,0.06); }
+
+  .mockup-orb {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #E8C96A, #C9A84C 40%, #8B6520);
+    box-shadow: 0 0 40px rgba(201,168,76,0.35), 0 0 80px rgba(201,168,76,0.1);
+    animation: orbBreathe 3s ease-in-out infinite;
+    position: relative;
+    z-index: 1;
+  }
+
+  .mockup-state {
+    font-family: 'Cinzel', serif;
+    font-size: 0.6rem;
+    letter-spacing: 0.3em;
+    color: var(--gold);
+    text-transform: uppercase;
+  }
+
+  .mockup-transcript {
+    width: 100%;
+    max-width: 480px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .transcript-msg {
+    padding: 1rem 1.25rem;
+    font-size: 0.88rem;
+    line-height: 1.6;
+    max-width: 85%;
+  }
+
+  .transcript-msg.eliana {
+    background: rgba(201,168,76,0.07);
+    border: 1px solid rgba(201,168,76,0.12);
+    color: var(--cream);
+    align-self: flex-start;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1rem;
+  }
+
+  .transcript-msg.user {
+    background: rgba(245,239,224,0.05);
+    border: 1px solid rgba(245,239,224,0.08);
+    color: var(--mist);
+    align-self: flex-end;
+  }
+
+  .mockup-controls {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+  }
+
+  .ctrl-btn {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    border: 1px solid rgba(201,168,76,0.2);
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--stone);
+    font-size: 1rem;
+    transition: all 0.2s;
+  }
+
+  .ctrl-btn:hover { border-color: var(--gold); color: var(--gold); }
+  .ctrl-btn.active { background: var(--gold); color: var(--night); border-color: var(--gold); }
+
+  /* ── FEATURES ── */
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 3rem;
+    margin-top: 4rem;
+  }
+
+  @media (max-width: 768px) {
+    .features-grid { grid-template-columns: 1fr; }
+  }
+
+  .feature-item {
+    display: flex;
+    gap: 1.5rem;
+  }
+
+  .feature-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 3rem;
+    font-weight: 300;
+    color: rgba(201,168,76,0.2);
+    line-height: 1;
+    flex-shrink: 0;
+    width: 2.5rem;
+  }
+
+  .feature-content {}
+
+  .feature-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.3rem;
+    color: var(--cream);
+    margin-bottom: 0.5rem;
+  }
+
+  .feature-desc {
+    font-size: 0.88rem;
+    line-height: 1.7;
+    color: var(--stone);
+  }
+
+  /* ── STACK ── */
+  .stack-section {
+    background: var(--deep);
+    padding: 6rem 2rem;
+  }
+
+  .stack-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .stack-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 3rem;
+  }
+
+  .pill {
+    padding: 0.5rem 1.25rem;
+    border: 1px solid rgba(201,168,76,0.2);
+    font-family: 'Cinzel', serif;
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    color: var(--gold);
+    text-transform: uppercase;
+    transition: all 0.2s;
+  }
+
+  .pill:hover {
+    background: var(--gold-dim);
+  }
+
+  .pill.highlight {
+    background: var(--gold-dim);
+    border-color: rgba(201,168,76,0.4);
+  }
+
+  /* ── FOOTER ── */
+  .footer {
+    padding: 4rem 2rem;
+    text-align: center;
+    border-top: 1px solid rgba(201,168,76,0.08);
+  }
+
+  .footer-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 3rem;
+    font-weight: 300;
+    color: var(--cream);
+    margin-bottom: 0.5rem;
+  }
+
+  .footer-sub {
+    font-family: 'Cinzel', serif;
+    font-size: 0.6rem;
+    letter-spacing: 0.4em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 2rem;
+  }
+
+  .footer-copy {
+    font-size: 0.8rem;
+    color: var(--stone);
+    margin-top: 3rem;
+  }
+
+  /* ── SCROLL REVEAL ── */
+  .reveal {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+</style>
+</head>
+<body>
+
+<!-- STAR FIELD -->
+<div class="star-field" id="stars"></div>
+
+<!-- ═══ HERO ═══ -->
+<section class="hero">
+  <div class="hero-bg"></div>
+
+  <div class="eyebrow">Gemini Live Agent Challenge 2026</div>
+
+  <div class="hero-orb-wrap">
+    <div class="orb-ring"></div>
+    <div class="orb-ring"></div>
+    <div class="orb-ring"></div>
+    <div class="orb"></div>
+  </div>
+
+  <h1 class="hero-title">Eliana</h1>
+  <div class="hero-subtitle">God Has Answered</div>
+
+  <p class="hero-tagline">
+    A live voice companion that listens, prays, and bridges the silence between the people we love.
+  </p>
+
+  <div class="hero-cta">
+    <a href="https://eliana.thamos.ca" class="btn-primary">Experience Eliana</a>
+    <a href="#story" class="btn-secondary">The Story</a>
+  </div>
+</section>
+
+<!-- ═══ STORY ═══ -->
+<section class="section" id="story">
+  <div class="story-grid">
+    <div class="reveal">
+      <div class="section-label">Origin</div>
+      <h2 class="section-title">Born from a<br><em>father's prayer</em></h2>
+      <div class="section-body">
+        <p>My daughter Mikaylah Aliyah Eliana entered the world after 459 contractions and an emergency C-section. She arrived with a giggle before her first cry, because a nurse refused to give up.</p>
+        <p>Her name means <em>"God has answered."</em> I wrote a book for her — <em>Eliana's Journal</em> — so that whenever she gets lonely, my words would remain with her always.</p>
+        <p>That book became the soul of this app. The theology is real. The grace is radical. The companion is built for the moments when no one else is there.</p>
+      </div>
+    </div>
+    <div class="reveal" style="transition-delay: 0.2s">
+      <div class="pull-quote">
+        Where sin costs ten dollars, grace has already paid one million. That is the God Eliana knows.
+        <div style="font-size:0.8rem; margin-top:1.5rem; color:var(--gold); font-style:normal; font-family:'Cinzel',serif; letter-spacing:0.2em; font-size:0.6rem;">HYPERPERISSEUŌ — ROMANS 5:20</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider reveal">
+  <div class="divider-line"></div>
+  <div class="divider-mark">Three Modes · One Soul</div>
+  <div class="divider-line"></div>
+</div>
+
+<!-- ═══ MODES ═══ -->
+<section class="section">
+  <div class="reveal">
+    <div class="section-label">Capabilities</div>
+    <h2 class="section-title">Built for the moments<br><em>that matter most</em></h2>
+  </div>
+
+  <div class="modes-grid">
+    <div class="mode-card primary reveal">
+      <div class="mode-badge live">Live</div>
+      <div class="mode-icon">🕊️</div>
+      <div class="mode-name">Companion</div>
+      <div class="mode-desc">Real-time voice conversation grounded in scripture. Eliana listens, honors silence, prays with you in your own words. For the 2am moments when no one else is there.</div>
+    </div>
+    <div class="mode-card reveal" style="transition-delay:0.15s">
+      <div class="mode-badge proto">Prototype</div>
+      <div class="mode-icon">🌉</div>
+      <div class="mode-name">Bridge</div>
+      <div class="mode-desc">Live bilingual conversation. Farsi ↔ English. For families separated by language, not by love.</div>
+    </div>
+    <div class="mode-card reveal" style="transition-delay:0.3s">
+      <div class="mode-badge soon">Soon</div>
+      <div class="mode-icon">📖</div>
+      <div class="mode-name">Tutor</div>
+      <div class="mode-desc">Original language scripture study. Learn hesed, tikvah, agápē as living words — not translations.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ UI MOCKUP ═══ -->
+<section class="ui-section">
+  <div class="reveal">
+    <div class="section-label">Interface</div>
+    <h2 class="section-title">Presence, not<br><em>a product</em></h2>
+  </div>
+
+  <div class="ui-mockup reveal" style="transition-delay:0.2s">
+    <div class="mockup-bar">
+      <div class="mockup-dot"></div>
+      <div class="mockup-dot"></div>
+      <div class="mockup-dot"></div>
+      <div class="mockup-url">eliana.thamos.ca — Companion Session</div>
+    </div>
+    <div class="mockup-body">
+      <div class="mockup-sidebar">
+        <div class="sidebar-brand">Eliana</div>
+        <div class="sidebar-tagline">Spiritual Companion</div>
+        <div class="sidebar-item active">
+          <div class="sidebar-item-dot"></div>
+          Companion
+        </div>
+        <div class="sidebar-item">
+          <div class="sidebar-item-dot"></div>
+          History
+        </div>
+        <div class="sidebar-item">
+          <div class="sidebar-item-dot"></div>
+          Settings
+        </div>
+      </div>
+      <div class="mockup-main">
+        <div class="mockup-orb-wrap">
+          <div class="mockup-orb-ring"></div>
+          <div class="mockup-orb-ring"></div>
+          <div class="mockup-orb"></div>
+        </div>
+        <div class="mockup-state">Listening</div>
+        <div class="mockup-transcript">
+          <div class="transcript-msg user">I don't know if God is even real anymore.</div>
+          <div class="transcript-msg eliana">That doubt has weight to it. I'm not going anywhere. Tell me more.</div>
+        </div>
+        <div class="mockup-controls">
+          <div class="ctrl-btn active">🎙</div>
+          <div class="ctrl-btn">⏸</div>
+          <div class="ctrl-btn">✕</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ THEOLOGY ═══ -->
+<section class="theology-section">
+  <div class="theology-inner">
+    <div class="reveal">
+      <div class="section-label">Depth</div>
+      <h2 class="section-title">Scripture in its<br><em>original voice</em></h2>
+      <p class="section-body" style="margin-bottom:0">
+        Eliana knows the words behind the translations. Not "abounds more" — but hyperperisseuō. Not just "hope" — but tikvah, a cord anchoring you to God's promises even in exile.
+      </p>
+    </div>
+
+    <div class="terms-grid">
+      <div class="term-card reveal">
+        <div class="term-original">ὑπερεπερίσσευσεν</div>
+        <div class="term-name">Hyperperisseuō</div>
+        <div class="term-phonetic">hoo-per-pe-ris-syoo-en</div>
+        <div class="term-meaning">Grace overflows in excess beyond all measure. Where sin costs ten dollars, God has already paid one million.</div>
+        <div class="term-ref">Romans 5:20</div>
+      </div>
+      <div class="term-card reveal" style="transition-delay:0.1s">
+        <div class="term-original">תִּקְוָה</div>
+        <div class="term-name">Tikvah</div>
+        <div class="term-phonetic">tik-VAH</div>
+        <div class="term-meaning">Hope — a cord, an anchor. Not a wish. Something that holds you even when you can't hold yourself.</div>
+        <div class="term-ref">Jeremiah 29:11</div>
+      </div>
+      <div class="term-card reveal" style="transition-delay:0.2s">
+        <div class="term-original">ἀγάπη</div>
+        <div class="term-name">Agápē</div>
+        <div class="term-phonetic">ah-GAH-pay</div>
+        <div class="term-meaning">Not sentiment. Covenant. Love that reaches you at your lowest because of who God is, not who you are.</div>
+        <div class="term-ref">Romans 5:8</div>
+      </div>
+      <div class="term-card reveal" style="transition-delay:0.1s">
+        <div class="term-original">εἰρήνη</div>
+        <div class="term-name">Eirēnē</div>
+        <div class="term-phonetic">ay-RAY-nay</div>
+        <div class="term-meaning">Shalom wearing Greek clothes. Not absence of conflict — wholeness, divine completeness.</div>
+        <div class="term-ref">Philippians 4:7</div>
+      </div>
+      <div class="term-card reveal" style="transition-delay:0.2s">
+        <div class="term-original">נִרְפָּא</div>
+        <div class="term-name">Nirpa</div>
+        <div class="term-phonetic">nir-PAH</div>
+        <div class="term-meaning">To heal, restore, make whole — body and spirit together. Complete restoration, not just relief.</div>
+        <div class="term-ref">Isaiah 53:5</div>
+      </div>
+      <div class="term-card reveal" style="transition-delay:0.3s">
+        <div class="term-original">μονογενής</div>
+        <div class="term-name">Monogenēs</div>
+        <div class="term-phonetic">mo-no-ge-NACE</div>
+        <div class="term-meaning">Unique. One-of-a-kind. Wholly unrepeatable. Yeshua's relationship with the Father is without category.</div>
+        <div class="term-ref">John 3:16</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ FEATURES ═══ -->
+<section class="section">
+  <div class="reveal">
+    <div class="section-label">Architecture</div>
+    <h2 class="section-title">Built different,<br><em>by design</em></h2>
+  </div>
+
+  <div class="features-grid">
+    <div class="feature-item reveal">
+      <div class="feature-num">01</div>
+      <div class="feature-content">
+        <div class="feature-title">The Holy Pause</div>
+        <div class="feature-desc">Eliana is comfortable with 3-4 seconds of silence. She doesn't rush to fill it. Silence is where people find their next true word.</div>
+      </div>
+    </div>
+    <div class="feature-item reveal" style="transition-delay:0.1s">
+      <div class="feature-num">02</div>
+      <div class="feature-content">
+        <div class="feature-title">Live Multimodal</div>
+        <div class="feature-desc">Powered by Gemini Live API — real-time bidirectional audio with vision context. She sees, she hears, she responds without delay.</div>
+      </div>
+    </div>
+    <div class="feature-item reveal" style="transition-delay:0.15s">
+      <div class="feature-num">03</div>
+      <div class="feature-content">
+        <div class="feature-title">Scripture Grounding</div>
+        <div class="feature-desc">Every response is explainable. Original Greek and Hebrew terms surface with phonetics, meaning, and theological context. No hallucinated verses.</div>
+      </div>
+    </div>
+    <div class="feature-item reveal" style="transition-delay:0.2s">
+      <div class="feature-num">04</div>
+      <div class="feature-content">
+        <div class="feature-title">Presence Over Product</div>
+        <div class="feature-desc">She doesn't say "How can I help you today?" She says "I'm here." She asks before interpreting. She prays in your words, not a template.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ STACK ═══ -->
+<section class="stack-section">
+  <div class="stack-inner">
+    <div class="reveal">
+      <div class="section-label">Technology</div>
+      <h2 class="section-title" style="font-size:clamp(2rem,4vw,3rem)">Built on Google Cloud</h2>
+    </div>
+    <div class="stack-pills reveal" style="transition-delay:0.1s">
+      <div class="pill highlight">Gemini Live API</div>
+      <div class="pill highlight">Cloud Run</div>
+      <div class="pill highlight">Cloud Build</div>
+      <div class="pill">React + Vite</div>
+      <div class="pill">TypeScript</div>
+      <div class="pill">WebSocket Relay</div>
+      <div class="pill">AudioWorklet</div>
+      <div class="pill">Supabase</div>
+      <div class="pill">Cloudflare Pages</div>
+      <div class="pill">Row Level Security</div>
+      <div class="pill">Edge Functions</div>
+      <div class="pill">PCM16 Audio Pipeline</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ FOOTER ═══ -->
+<footer class="footer">
+  <div class="reveal">
+    <div class="footer-title">Eliana</div>
+    <div class="footer-sub">God Has Answered</div>
+    <a href="https://eliana.thamos.ca" class="btn-primary">Begin Your Session</a>
+    <div class="footer-copy">
+      Built for the Gemini Live Agent Challenge 2026 · eliana.thamos.ca<br>
+      <span style="color:var(--gold);opacity:0.5">For Mikaylah Aliyah Eliana — whenever you get lonely, my words will remain with you always.</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Stars
+  const sf = document.getElementById('stars');
+  for (let i = 0; i < 120; i++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    s.style.cssText = `
+      left:${Math.random()*100}%;
+      top:${Math.random()*100}%;
+      --dur:${2 + Math.random()*4}s;
+      --max-op:${0.1 + Math.random()*0.4};
+      animation-delay:${Math.random()*4}s;
+      width:${Math.random() > 0.8 ? 3 : 2}px;
+      height:${Math.random() > 0.8 ? 3 : 2}px;
+    `;
+    sf.appendChild(s);
+  }
+
+  // Scroll reveal
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+</script>
+</body>
+</html>

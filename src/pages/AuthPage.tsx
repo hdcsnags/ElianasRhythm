@@ -21,7 +21,7 @@ export default function AuthPage() {
 
   useEffect(() => {
     if (!loading && user) {
-      navigate('/', { replace: true })
+      navigate('/companion', { replace: true })
     }
   }, [user, loading, navigate])
 
@@ -49,7 +49,7 @@ export default function AuthPage() {
         })
         if (error) throw error
       }
-      navigate('/', { replace: true })
+      navigate('/companion', { replace: true })
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Something went wrong. Please try again.')
     } finally {

@@ -92,3 +92,39 @@
     display: none;
   }
 }
+
+.reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-up {
+  animation: fadeUp 1.2s ease forwards;
+}
+
+.pull-quote {
+  position: relative;
+}
+
+.pull-quote::before {
+  content: '\201C';
+  font-size: 5rem;
+  color: #C9A84C;
+  opacity: 0.2;
+  position: absolute;
+  top: -1.5rem;
+  left: 1.5rem;
+  font-style: normal;
+  line-height: 1;
+}

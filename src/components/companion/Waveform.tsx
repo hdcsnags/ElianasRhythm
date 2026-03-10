@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react'
 
 const HEIGHTS = [8, 14, 20, 28, 22, 16, 24, 30, 18, 12, 26, 20, 14, 22, 16]
 
-export function Waveform({ visible, speaking: _speaking }: { visible: boolean; speaking?: boolean }) {
+export function Waveform({ visible, speaking }: { visible: boolean; speaking?: boolean }) {
   const containerRef = useRef<HTMLDivElement>(null)
   const initialized = useRef(false)
 
@@ -19,6 +19,14 @@ export function Waveform({ visible, speaking: _speaking }: { visible: boolean; s
       containerRef.current!.appendChild(bar)
     })
   }, [])
+
+  useEffect(() => {
+    if (!containerRef.current) return
+    const bars = containerRef.current.querySelectorAll('.wave-bar')
+    bars.forEach((bar) => {
+      ;(bar as HTMLElement).style.background = speaking ? '#FFE89A' : '#C9A84C'
+    })
+  }, [speaking])
 
   return (
     <div

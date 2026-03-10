@@ -1,20 +1,20 @@
 import { useEffect, useRef } from 'react'
 import type { Message } from '../../lib/types'
-import { formatTime } from '../../lib/utils'
-import { cn } from '../../lib/utils'
+import { formatTime, cn } from '../../lib/utils'
 
 interface TranscriptPanelProps {
   messages: Message[]
   loading?: boolean
   partialText?: string
+  isThinking?: boolean
 }
 
-export function TranscriptPanel({ messages, loading, partialText }: TranscriptPanelProps) {
+export function TranscriptPanel({ messages, loading, partialText, isThinking }: TranscriptPanelProps) {
   const bottomRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages, partialText])
+  }, [messages, partialText, isThinking])
 
   if (loading) {
     return (
@@ -24,10 +24,10 @@ export function TranscriptPanel({ messages, loading, partialText }: TranscriptPa
     )
   }
 
-  if (messages.length === 0 && !partialText) {
+  if (messages.length === 0 && !partialText && !isThinking) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center text-center px-6 py-12">
-        <p className="text-sm text-cream/[0.28] leading-relaxed max-w-xs font-serif text-base">
+        <p className="text-cream/[0.28] leading-relaxed max-w-xs font-serif text-base">
           Begin a session to start a conversation with Eliana.
         </p>
       </div>
@@ -39,10 +39,11 @@ export function TranscriptPanel({ messages, loading, partialText }: TranscriptPa
       {messages.map((msg) => (
         <TranscriptMessage key={msg.id} message={msg} />
       ))}
+
       {partialText && (
-        <div className="animate-msg-in">
-          <div className="text-[0.55rem] font-display tracking-[0.25em] uppercase text-gold px-2 mb-1">Eliana</div>
-          <div className="bg-gold/[0.07] border border-gold/[0.14] rounded-tl-none rounded-tr-lg rounded-br-lg rounded-bl-lg px-4 py-3 max-w-[88%]">
+        <div className="animate-msg-in flex flex-col gap-1">
+          <div className="text-[0.55rem] font-display tracking-[0.25em] uppercase text-gold px-2">Eliana</div>
+          <div className="bg-gold/[0.07] border border-gold/[0.14] rounded-tl-none rounded-tr-lg rounded-br-lg rounded-bl-lg px-4 py-3.5 max-w-[88%]">
             <p className="font-serif text-base text-cream leading-[1.65]">
               {partialText}
               <span className="inline-block w-1 h-3.5 bg-gold ml-0.5 animate-pulse rounded-sm" />
@@ -50,6 +51,18 @@ export function TranscriptPanel({ messages, loading, partialText }: TranscriptPa
           </div>
         </div>
       )}
+
+      {isThinking && !partialText && (
+        <div className="animate-msg-in flex flex-col gap-1">
+          <div className="text-[0.55rem] font-display tracking-[0.25em] uppercase text-gold px-2">Eliana</div>
+          <div className="flex items-center gap-1 px-4 py-3 bg-gold/[0.05] border border-gold/10 rounded-tl-none rounded-tr-lg rounded-br-lg rounded-bl-lg w-fit">
+            <div className="w-[5px] h-[5px] rounded-full bg-gold animate-typing-dot" />
+            <div className="w-[5px] h-[5px] rounded-full bg-gold animate-typing-dot" style={{ animationDelay: '0.2s' }} />
+            <div className="w-[5px] h-[5px] rounded-full bg-gold animate-typing-dot" style={{ animationDelay: '0.4s' }} />
+          </div>
+        </div>
+      )}
+
       <div ref={bottomRef} />
     </div>
   )
@@ -68,7 +81,7 @@ function TranscriptMessage({ message }: { message: Message }) {
       </div>
 
       <div className={cn(
-        'px-4 py-3 text-[0.88rem] leading-[1.65] max-w-[88%]',
+        'px-4 py-3.5 text-[0.88rem] leading-[1.65] max-w-[88%] relative',
         isUser
           ? 'bg-cream/[0.05] border border-cream/[0.08] rounded-tl-lg rounded-tr-none rounded-br-lg rounded-bl-lg self-end text-right text-cream/[0.65]'
           : 'bg-gold/[0.07] border border-gold/[0.14] rounded-tl-none rounded-tr-lg rounded-br-lg rounded-bl-lg self-start text-cream font-serif text-base'

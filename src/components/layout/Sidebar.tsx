@@ -21,7 +21,7 @@ export function Sidebar() {
 
   const handleSignOut = async () => {
     await signOut()
-    navigate('/auth')
+    navigate('/')
   }
 
   const initials = user?.email?.charAt(0).toUpperCase() ?? 'E'

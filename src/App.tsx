@@ -3,8 +3,8 @@ import { AuthProvider } from './state/AuthContext'
 import { useAuth } from './hooks/useAuth'
 import { PageLoader } from './components/ui/LoadingSpinner'
 import AppShell from './components/layout/AppShell'
+import LandingPage from './pages/LandingPage'
 import AuthPage from './pages/AuthPage'
-import DashboardPage from './pages/DashboardPage'
 import CompanionPage from './pages/CompanionPage'
 import HistoryPage from './pages/HistoryPage'
 import SettingsPage from './pages/SettingsPage'
@@ -20,11 +20,15 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 function PublicOnlyRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth()
   if (loading) return <PageLoader />
-  if (user) return <Navigate to="/" replace />
+  if (user) return <Navigate to="/dashboard" replace />
   return <>{children}</>
 }
 
 const router = createBrowserRouter([
+  {
+    path: '/',
+    element: <LandingPage />,
+  },
   {
     path: '/auth',
     element: (
@@ -34,19 +38,59 @@ const router = createBrowserRouter([
     ),
   },
   {
-    path: '/',
+    path: '/companion',
     element: (
       <ProtectedRoute>
         <AppShell />
       </ProtectedRoute>
     ),
     children: [
-      { index: true, element: <DashboardPage /> },
-      { path: 'companion', element: <CompanionPage /> },
-      { path: 'companion/:sessionId', element: <CompanionPage /> },
-      { path: 'history', element: <HistoryPage /> },
-      { path: 'prayers', element: <PrayerPage /> },
-      { path: 'settings', element: <SettingsPage /> },
+      { index: true, element: <CompanionPage /> },
+      { path: ':sessionId', element: <CompanionPage /> },
+    ],
+  },
+  {
+    path: '/dashboard',
+    element: (
+      <ProtectedRoute>
+        <AppShell />
+      </ProtectedRoute>
+    ),
+    children: [
+      { index: true, element: <Navigate to="/companion" replace /> },
+    ],
+  },
+  {
+    path: '/history',
+    element: (
+      <ProtectedRoute>
+        <AppShell />
+      </ProtectedRoute>
+    ),
+    children: [
+      { index: true, element: <HistoryPage /> },
+    ],
+  },
+  {
+    path: '/prayers',
+    element: (
+      <ProtectedRoute>
+        <AppShell />
+      </ProtectedRoute>
+    ),
+    children: [
+      { index: true, element: <PrayerPage /> },
+    ],
+  },
+  {
+    path: '/settings',
+    element: (
+      <ProtectedRoute>
+        <AppShell />
+      </ProtectedRoute>
+    ),
+    children: [
+      { index: true, element: <SettingsPage /> },
     ],
   },
   {

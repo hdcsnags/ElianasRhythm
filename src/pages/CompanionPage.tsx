@@ -5,6 +5,7 @@ import { LiveControls } from '../components/companion/LiveControls'
 import { TranscriptPanel } from '../components/companion/TranscriptPanel'
 import { StarField } from '../components/companion/StarField'
 import { Waveform } from '../components/companion/Waveform'
+import { ScripturePeek } from '../components/companion/ScripturePeek'
 
 import { LoadingSpinner } from '../components/ui/LoadingSpinner'
 import { useLive } from '../hooks/useLive'
@@ -78,7 +79,7 @@ export default function CompanionPage() {
           navigate(`/companion/${s.id}`, { replace: true })
         }
       } catch {
-        // fallback: show error state
+        // fallback
       } finally {
         setSessionLoading(false)
       }
@@ -171,6 +172,8 @@ export default function CompanionPage() {
     )
   }
 
+  const isThinking = live.state === 'paused' || live.state === 'connecting'
+
   return (
     <div className="h-full grid grid-cols-1 lg:grid-cols-[1fr_340px]">
       <div className="relative flex flex-col items-center justify-center overflow-hidden bg-night">
@@ -180,7 +183,7 @@ export default function CompanionPage() {
         <StarField />
 
         <div className="absolute top-6 left-6 flex flex-col gap-1 z-10">
-          <div className="font-serif text-base text-cream">Companion Session</div>
+          <div className="font-serif text-base text-cream font-normal">Companion Session</div>
           <div className="text-[0.7rem] text-cream/[0.28] tracking-wide">{user?.email}</div>
           {live.isActive && (
             <div className="font-display text-[0.65rem] text-gold tracking-[0.2em] mt-1">
@@ -224,9 +227,12 @@ export default function CompanionPage() {
           messages={messages}
           loading={messagesLoading}
           partialText={partialText}
+          isThinking={isThinking}
         />
 
         <div className="px-6 py-4 border-t border-gold/[0.08] shrink-0">
+          <ScripturePeek />
+
           {session.status === 'active' && (
             <TextInputBar onSend={handleSendText} disabled={live.isConnecting || textSending} sending={textSending} />
           )}
@@ -252,7 +258,7 @@ function TextInputBar({ onSend, disabled, sending }: { onSend: (text: string) =>
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex items-center gap-2">
+    <form onSubmit={handleSubmit} className="flex items-center gap-2 mt-3">
       <input
         type="text"
         value={value}

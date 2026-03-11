@@ -44,16 +44,26 @@ class LiveServiceImpl implements LiveService {
     let relayBaseUrl = RELAY_URL.trim()
 
     try {
-      const { data: { session } } = await supabase.auth.getSession()
-      const accessToken = session?.access_token
-      if (!accessToken) throw new Error('Not authenticated')
+      const { data: { session: authSession } } = await supabase.auth.getSession()
+      if (!authSession?.access_token) throw new Error('Not authenticated')
 
-      supabase.functions.setAuth(accessToken)
-      const { data, error } = await supabase.functions.invoke('relay-live-token', {
-        body: { sessionId: config.sessionId, mode: config.mode },
+      const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/relay-live-token`
+      const res = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${authSession.access_token}`,
+          'Content-Type': 'application/json',
+          'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
+        },
+        body: JSON.stringify({ sessionId: config.sessionId, mode: config.mode }),
       })
 
-      if (error) throw new Error(error.message)
+      if (!res.ok) {
+        const errBody = await res.text()
+        throw new Error(`Edge Function returned a non-2xx status code: ${res.status} ${errBody}`)
+      }
+
+      const data = await res.json()
 
       relayToken = (data as { token?: string })?.token ?? ''
       const providedUrl = (data as { relayUrl?: string })?.relayUrl ?? ''
@@ -211,15 +221,22 @@ class LiveServiceImpl implements LiveService {
 
   private async runFallback(config: LiveSessionConfig, reason?: string) {
     try {
-      const { data: { session } } = await supabase.auth.getSession()
-      const accessToken = session?.access_token
-      if (!accessToken) throw new Error('Not authenticated')
+      const { data: { session: authSession } } = await supabase.auth.getSession()
+      if (!authSession?.access_token) throw new Error('Not authenticated')
 
-      supabase.functions.setAuth(accessToken)
-      const { data, error } = await supabase.functions.invoke('safe-response-fallback', {
-        body: { mode: config.mode, sessionId: config.sessionId, reason },
+      const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/safe-response-fallback`
+      const res = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${authSession.access_token}`,
+          'Content-Type': 'application/json',
+          'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
+        },
+        body: JSON.stringify({ mode: config.mode, sessionId: config.sessionId, reason }),
       })
-      if (error) throw new Error(error.message)
+
+      if (!res.ok) throw new Error(`Fallback returned ${res.status}`)
+      const data = await res.json()
 
       const text = (data as { text?: string; response?: string; message?: string })?.text
         ?? (data as { text?: string; response?: string; message?: string })?.response

@@ -121,12 +121,19 @@ export default function CompanionPage() {
         const accessToken = authData.session?.access_token
         if (!accessToken) throw new Error('Not authenticated')
 
-        supabase.functions.setAuth(accessToken)
-        const { data, error } = await supabase.functions.invoke('chat-text', {
-          body: { sessionId: session.id, message: text, history },
+        const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat-text`
+        const res = await fetch(apiUrl, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${accessToken}`,
+            'Content-Type': 'application/json',
+            'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
+          },
+          body: JSON.stringify({ sessionId: session.id, message: text, history }),
         })
 
-        if (error) throw new Error(error.message)
+        if (!res.ok) throw new Error(`Chat request failed: ${res.status}`)
+        const data = await res.json()
 
         const responseText = (data as { response?: string })?.response
           ?? "Peace be with you. I'm here and listening."

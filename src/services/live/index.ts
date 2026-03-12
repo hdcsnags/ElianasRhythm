@@ -44,14 +44,14 @@ class LiveServiceImpl implements LiveService {
     let relayBaseUrl = RELAY_URL.trim()
 
     try {
-      const { data: { session: authSession } } = await supabase.auth.getSession()
-      if (!authSession?.access_token) throw new Error('Not authenticated')
+      const { data: { session } } = await supabase.auth.refreshSession()
+      if (!session?.access_token) throw new Error('Not authenticated')
 
       const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/relay-live-token`
       const res = await fetch(apiUrl, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${authSession.access_token}`,
+          'Authorization': `Bearer ${session.access_token}`,
           'Content-Type': 'application/json',
           'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
         },
@@ -221,14 +221,14 @@ class LiveServiceImpl implements LiveService {
 
   private async runFallback(config: LiveSessionConfig, reason?: string) {
     try {
-      const { data: { session: authSession } } = await supabase.auth.getSession()
-      if (!authSession?.access_token) throw new Error('Not authenticated')
+      const { data: { session } } = await supabase.auth.refreshSession()
+      if (!session?.access_token) throw new Error('Not authenticated')
 
       const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/safe-response-fallback`
       const res = await fetch(apiUrl, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${authSession.access_token}`,
+          'Authorization': `Bearer ${session.access_token}`,
           'Content-Type': 'application/json',
           'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
         },

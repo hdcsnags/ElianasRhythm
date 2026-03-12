@@ -44,7 +44,7 @@ class LiveServiceImpl implements LiveService {
     let relayBaseUrl = RELAY_URL.trim()
 
     try {
-      const { data: { session } } = await supabase.auth.refreshSession()
+      const { data: { session } } = await supabase.auth.getSession()
       if (!session?.access_token) throw new Error('Not authenticated')
 
       const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/relay-live-token`
@@ -221,7 +221,7 @@ class LiveServiceImpl implements LiveService {
 
   private async runFallback(config: LiveSessionConfig, reason?: string) {
     try {
-      const { data: { session } } = await supabase.auth.refreshSession()
+      const { data: { session } } = await supabase.auth.getSession()
       if (!session?.access_token) throw new Error('Not authenticated')
 
       const apiUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/safe-response-fallback`

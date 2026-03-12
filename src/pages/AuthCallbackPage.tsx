@@ -8,7 +8,7 @@ export default function AuthCallbackPage() {
   useEffect(() => {
     const hash = window.location.hash
     if (hash && hash.includes('access_token')) {
-      supabase.auth.refreshSession().then(({ data: { session } }) => {
+      supabase.auth.getSession().then(({ data: { session } }) => {
         if (session) {
           window.history.replaceState(null, '', window.location.pathname)
           navigate('/companion', { replace: true })
@@ -17,7 +17,7 @@ export default function AuthCallbackPage() {
         }
       })
     } else {
-      supabase.auth.refreshSession().then(({ data: { session } }) => {
+      supabase.auth.getSession().then(({ data: { session } }) => {
         navigate(session ? '/companion' : '/auth', { replace: true })
       })
     }

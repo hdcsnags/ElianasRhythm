@@ -34,39 +34,56 @@ function sendToClient(ws: WebSocket, msg: RelayToClientMessage) {
   }
 }
 
-async function verifyToken(token: string, sessionId: string): Promise<{ userId: string } | null> {
-  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) return null
+function decodeJwtUserId(token: string): string | null {
   try {
-    const res = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        apikey: SUPABASE_SERVICE_ROLE_KEY || SUPABASE_ANON_KEY,
-      },
-    })
-    if (!res.ok) {
-      const errBody = await res.text()
-      console.error('[relay] verifyToken auth failed:', res.status, res.statusText, errBody)
+    const parts = token.split('.')
+    if (parts.length !== 3) return null
+    const payload = Buffer.from(parts[1], 'base64url').toString('utf-8')
+    const decoded = JSON.parse(payload) as { sub?: string }
+    return decoded.sub ?? null
+  } catch (err) {
+    console.error('[relay] JWT decode failed:', err)
+    return null
+  }
+}
+
+async function verifyToken(token: string, sessionId: string): Promise<{ userId: string } | null> {
+  try {
+    const userId = decodeJwtUserId(token)
+    if (!userId) {
+      console.error('[relay] verifyToken: could not decode user ID from JWT')
       return null
     }
-    const user = await res.json() as { id?: string }
-    if (!user?.id) return null
+
+    if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+      console.warn('[relay] verifyToken: SUPABASE_URL or SUPABASE_ANON_KEY not set — skipping session check')
+      return { userId }
+    }
 
     const sessRes = await fetch(
-      `${SUPABASE_URL}/rest/v1/sessions?id=eq.${encodeURIComponent(sessionId)}&user_id=eq.${encodeURIComponent(user.id)}&select=id`,
+      `${SUPABASE_URL}/rest/v1/sessions?id=eq.${encodeURIComponent(sessionId)}&user_id=eq.${encodeURIComponent(userId)}&select=id`,
       {
         headers: {
           Authorization: `Bearer ${token}`,
-          apikey: SUPABASE_ANON_KEY,
+          apikey: SUPABASE_SERVICE_ROLE_KEY || SUPABASE_ANON_KEY,
           Accept: 'application/json',
         },
       }
     )
-    if (!sessRes.ok) return null
+    if (!sessRes.ok) {
+      const errBody = await sessRes.text()
+      console.error('[relay] verifyToken session check failed:', sessRes.status, sessRes.statusText, errBody)
+      return null
+    }
     const sessions = await sessRes.json() as unknown[]
-    if (!Array.isArray(sessions) || sessions.length === 0) return null
+    if (!Array.isArray(sessions) || sessions.length === 0) {
+      console.error('[relay] verifyToken: session not found for user', userId, 'session', sessionId)
+      return null
+    }
 
-    return { userId: user.id }
-  } catch {
+    return { userId }
+  } catch (err) {
+    console.error('[relay] verifyToken error:', err)
     return null
   }
 }

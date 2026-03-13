@@ -14,7 +14,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url))
 const PROVIDER_API_KEY = process.env.LIVE_PROVIDER_API_KEY ?? ''
 const PROVIDER_WS_URL =
   process.env.LIVE_PROVIDER_WS_URL ??
-  'wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1alpha.GenerativeService.BidiGenerateContent'
+  'wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContent'
 const SUPABASE_URL = process.env.SUPABASE_URL ?? ''
 const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY ?? ''
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY ?? ''
@@ -91,7 +91,7 @@ async function verifyToken(token: string, sessionId: string): Promise<{ userId: 
 function buildGeminiSetupMessage(mode: string, systemPrompt: string) {
   return {
     setup: {
-      model: 'models/gemini-2.5-flash-preview-native-audio-dialog',
+      model: 'models/gemini-2.5-flash-native-audio',
       generation_config: {
         response_modalities: ['AUDIO', 'TEXT'],
         speech_config: {

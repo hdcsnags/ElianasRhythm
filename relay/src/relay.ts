@@ -91,7 +91,7 @@ async function verifyToken(token: string, sessionId: string): Promise<{ userId: 
 function buildGeminiSetupMessage(mode: string, systemPrompt: string) {
   return {
     setup: {
-      model: 'models/gemini-2.0-flash-live-001',
+      model: 'models/gemini-2.5-flash-preview-native-audio-dialog',
       generation_config: {
         response_modalities: ['AUDIO', 'TEXT'],
         speech_config: {

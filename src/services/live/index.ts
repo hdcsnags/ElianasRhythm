@@ -130,6 +130,7 @@ class LiveServiceImpl implements LiveService {
 
     switch (type) {
       case 'ready':
+      case 'session_ready':
         this.setState('listening')
         this.emit({ type: 'fallback', payload: { active: false }, timestamp: Date.now() })
         this.startMicAndPlayback()

@@ -64,7 +64,7 @@ async function verifyToken(token: string, sessionId: string): Promise<{ userId: 
       `${SUPABASE_URL}/rest/v1/sessions?id=eq.${encodeURIComponent(sessionId)}&user_id=eq.${encodeURIComponent(userId)}&select=id`,
       {
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY || SUPABASE_ANON_KEY}`,
           apikey: SUPABASE_SERVICE_ROLE_KEY || SUPABASE_ANON_KEY,
           Accept: 'application/json',
         },

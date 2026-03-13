@@ -17,6 +17,7 @@ const PROVIDER_WS_URL =
   'wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1alpha.GenerativeService.BidiGenerateContent'
 const SUPABASE_URL = process.env.SUPABASE_URL ?? ''
 const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY ?? ''
+const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY ?? ''
 
 function loadPrompt(mode: string): string {
   try {
@@ -39,7 +40,7 @@ async function verifyToken(token: string, sessionId: string): Promise<{ userId: 
     const res = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
       headers: {
         Authorization: `Bearer ${token}`,
-        apikey: SUPABASE_ANON_KEY,
+        apikey: SUPABASE_SERVICE_ROLE_KEY || SUPABASE_ANON_KEY,
       },
     })
     if (!res.ok) return null

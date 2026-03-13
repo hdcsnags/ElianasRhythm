@@ -100,7 +100,9 @@ class LiveServiceImpl implements LiveService {
 
       this.ws.onmessage = (evt) => {
         try {
-          this.handleRelayEvent(JSON.parse(evt.data as string) as Record<string, unknown>)
+          const parsed = JSON.parse(evt.data as string) as Record<string, unknown>
+          console.log('[LiveService] WS message received:', parsed.type, parsed)
+          this.handleRelayEvent(parsed)
         } catch {
           console.error('[LiveService] WS parse error', evt.data)
         }
@@ -131,6 +133,7 @@ class LiveServiceImpl implements LiveService {
     switch (type) {
       case 'ready':
       case 'session_ready':
+        console.log('[LiveService] Mic init triggered by event:', type)
         this.setState('listening')
         this.emit({ type: 'fallback', payload: { active: false }, timestamp: Date.now() })
         this.startMicAndPlayback()
@@ -204,10 +207,14 @@ class LiveServiceImpl implements LiveService {
     })
 
     try {
+      console.log('[LiveService] Starting mic pipeline...')
       await this.mic.start()
       this.micStarted = true
+      console.log('[LiveService] Mic pipeline started successfully')
     } catch (err) {
-      console.error('[LiveService] Mic start failed', err)
+      console.error('[LiveService] Mic start failed — reason:', err)
+      console.error('[LiveService] Mic error name:', (err as Error)?.name)
+      console.error('[LiveService] Mic error message:', (err as Error)?.message)
       this.emit({ type: 'error', payload: { code: 'MIC_ERROR', message: 'Microphone access denied or failed' }, timestamp: Date.now() })
     }
   }

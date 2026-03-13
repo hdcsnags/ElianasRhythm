@@ -43,7 +43,11 @@ async function verifyToken(token: string, sessionId: string): Promise<{ userId: 
         apikey: SUPABASE_SERVICE_ROLE_KEY || SUPABASE_ANON_KEY,
       },
     })
-    if (!res.ok) return null
+    if (!res.ok) {
+      const errBody = await res.text()
+      console.error('[relay] verifyToken auth failed:', res.status, res.statusText, errBody)
+      return null
+    }
     const user = await res.json() as { id?: string }
     if (!user?.id) return null
 

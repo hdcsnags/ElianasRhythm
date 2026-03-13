@@ -91,9 +91,9 @@ async function verifyToken(token: string, sessionId: string): Promise<{ userId: 
 function buildGeminiSetupMessage(mode: string, systemPrompt: string) {
   return {
     setup: {
-      model: 'models/gemini-2.5-flash-native-audio',
+      model: 'models/gemini-2.5-flash',
       generation_config: {
-        response_modalities: ['AUDIO', 'TEXT'],
+        response_modalities: ['audio'],
         speech_config: {
           voice_config: {
             prebuilt_voice_config: { voice_name: 'Aoede' },
@@ -103,7 +103,6 @@ function buildGeminiSetupMessage(mode: string, systemPrompt: string) {
       system_instruction: {
         parts: [{ text: systemPrompt }],
       },
-      tools: [],
     },
   }
 }
@@ -131,7 +130,9 @@ function connectToGemini(
 
   providerWs.on('open', () => {
     console.log(`[relay] Gemini WS open — session=${conn.sessionId}`)
-    providerWs.send(JSON.stringify(buildGeminiSetupMessage(mode, systemPrompt)))
+    const setupMsg = buildGeminiSetupMessage(mode, systemPrompt)
+    console.log(`[relay] Sending setup message:`, JSON.stringify(setupMsg))
+    providerWs.send(JSON.stringify(setupMsg))
   })
 
   let assistantAudioActive = false
@@ -219,8 +220,8 @@ function connectToGemini(
     })
   })
 
-  providerWs.on('close', (code) => {
-    console.log(`[relay] Gemini WS closed — session=${conn.sessionId} code=${code}`)
+  providerWs.on('close', (code, reason) => {
+    console.log(`[relay] Gemini WS closed — session=${conn.sessionId} code=${code} reason=${reason?.toString() ?? 'none'}`)
     if (clientWs.readyState === WebSocket.OPEN) {
       sendToClient(clientWs, { type: 'error', code: 'PROVIDER_CLOSED', message: 'Provider disconnected' })
     }

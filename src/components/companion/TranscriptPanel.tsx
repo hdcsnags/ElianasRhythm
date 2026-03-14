@@ -2,6 +2,10 @@ import { useEffect, useRef } from 'react'
 import type { Message } from '../../lib/types'
 import { formatTime, cn } from '../../lib/utils'
 
+function stripMarkdown(text: string): string {
+  return text.replace(/(\*\*|__)(.*?)\1/g, '$2').replace(/(\*|_)(.*?)\1/g, '$2')
+}
+
 interface TranscriptPanelProps {
   messages: Message[]
   loading?: boolean
@@ -45,7 +49,7 @@ export function TranscriptPanel({ messages, loading, partialText, isThinking }: 
           <div className="text-[0.55rem] font-display tracking-[0.25em] uppercase text-gold px-2">Eliana</div>
           <div className="bg-gold/[0.07] border border-gold/[0.14] rounded-tl-none rounded-tr-lg rounded-br-lg rounded-bl-lg px-4 py-3.5 max-w-[88%]">
             <p className="font-serif text-base text-cream leading-[1.65]">
-              {partialText}
+              {stripMarkdown(partialText)}
               <span className="inline-block w-1 h-3.5 bg-gold ml-0.5 animate-pulse rounded-sm" />
             </p>
           </div>
@@ -86,7 +90,7 @@ function TranscriptMessage({ message }: { message: Message }) {
           ? 'bg-cream/[0.05] border border-cream/[0.08] rounded-tl-lg rounded-tr-none rounded-br-lg rounded-bl-lg self-end text-right text-cream/[0.65]'
           : 'bg-gold/[0.07] border border-gold/[0.14] rounded-tl-none rounded-tr-lg rounded-br-lg rounded-bl-lg self-start text-cream font-serif text-base'
       )}>
-        {message.content}
+        {stripMarkdown(message.content)}
       </div>
 
       <div className={cn(

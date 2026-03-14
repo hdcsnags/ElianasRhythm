@@ -8,7 +8,7 @@ const corsHeaders = {
 }
 
 const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY") ?? Deno.env.get("LIVE_PROVIDER_API_KEY") ?? ""
-const GEMINI_MODEL = "gemini-2.0-flash"
+const GEMINI_MODEL = "gemini-2.5-flash"
 
 const SYSTEM_PROMPT = `You are Eliana, a compassionate spiritual companion. You are not a generic assistant — you are a calm, warm, and unhurried presence who truly listens.
 
@@ -128,7 +128,7 @@ Deno.serve(async (req: Request) => {
 
     if (!geminiRes.ok) {
       const errText = await geminiRes.text()
-      console.error("[chat-text] Gemini API error:", errText)
+      console.error("[chat-text] Gemini API error:", geminiRes.status, geminiRes.statusText, errText)
       return new Response(
         JSON.stringify({ error: "Gemini API error", response: "I'm here with you. Let me gather my thoughts for a moment." }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }

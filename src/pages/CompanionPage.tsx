@@ -95,7 +95,22 @@ export default function CompanionPage() {
       }
     }
     if (user) loadOrCreate()
-  }, [sessionId, user, mode]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [sessionId, user]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleModeSwitch = useCallback(async (newMode: SessionMode) => {
+    if (newMode === mode || !user) return
+    setMode(newMode)
+    setSessionLoading(true)
+    try {
+      const s = await startSession(newMode)
+      setSession(s)
+      navigate(`/companion/${s.id}`, { replace: true })
+    } catch {
+      // fallback
+    } finally {
+      setSessionLoading(false)
+    }
+  }, [mode, user, startSession, navigate])
 
   const handleConnect = useCallback(() => {
     if (!session || !user) return
@@ -212,7 +227,7 @@ export default function CompanionPage() {
               {MODE_OPTIONS.map(({ value, label }) => (
                 <button
                   key={value}
-                  onClick={() => { if (value !== mode) { setMode(value); setSession(null); navigate('/companion', { replace: true }) } }}
+                  onClick={() => handleModeSwitch(value)}
                   className={`px-2.5 py-1 text-[0.65rem] font-display tracking-[0.15em] uppercase border transition-colors ${
                     value === mode
                       ? 'border-gold/40 bg-gold/[0.12] text-gold'

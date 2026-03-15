@@ -15,9 +15,9 @@ export default function DashboardPage() {
   const displayName = profile?.display_name ?? user?.email?.split('@')[0] ?? 'Friend'
   const recentSessions = sessions.slice(0, 3)
 
-  const handleStartCompanion = async () => {
+  const handleStartMode = async (mode: 'companion' | 'bridge' | 'tutor' = 'companion') => {
     try {
-      const session = await startSession('companion')
+      const session = await startSession(mode)
       navigate(`/companion/${session.id}`)
     } catch {
       // error handled in hook
@@ -42,7 +42,7 @@ export default function DashboardPage() {
             <div className="absolute w-[260px] h-[260px] rounded-full border border-gold/[0.08] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-ring-pulse" style={{ animationDelay: '0.8s' }} />
             <div
               className="w-[140px] h-[140px] rounded-full animate-orb-breathe cursor-pointer relative z-10"
-              onClick={handleStartCompanion}
+              onClick={() => handleStartMode('companion')}
               style={{
                 background: 'radial-gradient(circle at 35% 35%, #E8C96A 0%, #C9A84C 30%, #A07830 60%, #6B4E20 100%)',
                 boxShadow: '0 0 60px rgba(201,168,76,0.4), 0 0 120px rgba(201,168,76,0.15), inset 0 0 30px rgba(255,255,255,0.1)',
@@ -67,7 +67,7 @@ export default function DashboardPage() {
 
           <div className="flex gap-3 flex-wrap justify-center">
             <button
-              onClick={handleStartCompanion}
+              onClick={() => handleStartMode('companion')}
               className="px-8 py-3 bg-gradient-to-br from-gold to-[#A07830] text-night text-sm font-medium tracking-[0.1em] uppercase transition-all hover:brightness-110 relative overflow-hidden"
             >
               Begin Session
@@ -93,7 +93,7 @@ export default function DashboardPage() {
       <section className="max-w-4xl mx-auto px-6 py-16">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div
-            onClick={handleStartCompanion}
+            onClick={() => handleStartMode('companion')}
             className="p-8 border border-gold/25 bg-gradient-to-br from-gold/[0.08] to-surface cursor-pointer transition-all duration-300 hover:border-gold/40 hover:-translate-y-1 relative overflow-hidden group"
           >
             <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-gold to-transparent" />
@@ -103,7 +103,7 @@ export default function DashboardPage() {
             <p className="text-sm text-cream/[0.28] leading-relaxed">Real-time voice conversation grounded in scripture. For the 2am moments when no one else is there.</p>
           </div>
 
-          <div className="p-8 border border-gold/25 bg-gradient-to-br from-gold/[0.08] to-surface transition-all duration-300 hover:border-gold/40 hover:-translate-y-1 relative overflow-hidden group cursor-pointer" onClick={handleStartCompanion}>
+          <div className="p-8 border border-gold/25 bg-gradient-to-br from-gold/[0.08] to-surface transition-all duration-300 hover:border-gold/40 hover:-translate-y-1 relative overflow-hidden group cursor-pointer" onClick={() => handleStartMode('bridge')}>
             <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-gold to-transparent" />
             <div className="font-display text-[0.55rem] tracking-[0.3em] text-gold uppercase border border-gold px-2 py-0.5 inline-block mb-4">Live</div>
             <Globe className="w-7 h-7 text-gold/60 mb-3" />
@@ -111,7 +111,7 @@ export default function DashboardPage() {
             <p className="text-sm text-cream/[0.28] leading-relaxed">Live bilingual conversation. For families separated by language, not by love.</p>
           </div>
 
-          <div className="p-8 border border-gold/25 bg-gradient-to-br from-gold/[0.08] to-surface transition-all duration-300 hover:border-gold/40 hover:-translate-y-1 relative overflow-hidden group cursor-pointer" onClick={handleStartCompanion}>
+          <div className="p-8 border border-gold/25 bg-gradient-to-br from-gold/[0.08] to-surface transition-all duration-300 hover:border-gold/40 hover:-translate-y-1 relative overflow-hidden group cursor-pointer" onClick={() => handleStartMode('tutor')}>
             <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-gold to-transparent" />
             <div className="font-display text-[0.55rem] tracking-[0.3em] text-gold uppercase border border-gold px-2 py-0.5 inline-block mb-4">Live</div>
             <GraduationCap className="w-7 h-7 text-gold/60 mb-3" />

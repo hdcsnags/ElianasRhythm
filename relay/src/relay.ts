@@ -2,7 +2,7 @@
 // Architecture: Browser WS ↔ this relay ↔ Gemini Live (via @google/genai SDK)
 // Provider API keys stay server-side only, never forwarded to clients.
 
-import { GoogleGenAI, Modality, type Session } from '@google/genai'
+import { GoogleGenAI, Modality, ActivityHandling, type Session } from '@google/genai'
 import { WebSocket, WebSocketServer } from 'ws'
 import type { IncomingMessage } from 'http'
 import { readFileSync } from 'fs'
@@ -109,8 +109,11 @@ async function connectToGemini(
         responseModalities: [Modality.AUDIO],
         speechConfig: {
           voiceConfig: {
-            prebuiltVoiceConfig: { voiceName: 'Aoede' },
+            prebuiltVoiceConfig: { voiceName: 'Kore' },
           },
+        },
+        realtimeInputConfig: {
+          activityHandling: ActivityHandling.START_OF_ACTIVITY_INTERRUPTS,
         },
         systemInstruction: systemPrompt,
       },

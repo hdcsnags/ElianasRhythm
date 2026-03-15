@@ -36,28 +36,28 @@ export default function LandingPage() {
   const handleExperience = () => navigate('/companion')
 
   return (
-    <div ref={mainRef} className="bg-night text-cream overflow-x-hidden">
+    <div ref={mainRef} className="bg-night text-cream overflow-x-hidden h-screen overflow-y-auto snap-y snap-mandatory">
       <div className="fixed inset-0 pointer-events-none z-0">
         <StarField count={120} />
       </div>
 
-      <LandingHero onExperience={handleExperience} />
+      <div className="snap-start"><LandingHero onExperience={handleExperience} /></div>
 
-      <LandingStory />
+      <div className="snap-start"><LandingStory /></div>
 
-      <Divider text="Three Modes &middot; One Soul" />
+      <div className="snap-start"><Divider text="Three Modes &middot; One Soul" /></div>
 
-      <LandingModes onExperience={handleExperience} />
+      <div className="snap-start"><LandingModes onExperience={handleExperience} /></div>
 
-      <LandingUiPreview />
+      <div className="snap-start"><LandingUiPreview /></div>
 
-      <LandingTheology />
+      <div className="snap-start"><LandingTheology /></div>
 
-      <LandingFeatures />
+      <div className="snap-start"><LandingFeatures /></div>
 
-      <LandingStack />
+      <div className="snap-start"><LandingStack /></div>
 
-      <LandingFooter onExperience={handleExperience} />
+      <div className="snap-start"><LandingFooter onExperience={handleExperience} /></div>
     </div>
   )
 }

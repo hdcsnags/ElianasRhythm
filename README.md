@@ -2,14 +2,14 @@
 
 A real-time spiritual companion powered by Gemini Live. Eliana offers compassionate voice conversations, scripture study, and guidance through faith transitions — all through a calming, presence-first interface.
 
-Built for the [Google Gemini API Developer Competition 2025](https://ai.google.dev/competition).
+Built for the **Gemini Live Agent Challenge 2026**.
 
 ## Features
 
 - **Live Voice Sessions** — Real-time bidirectional audio with Gemini Live API via the `@google/genai` SDK. Speak naturally; Eliana listens and responds with warmth.
 - **Three Modes**
   - **Companion** — Reflective, empathetic spiritual conversation
-  - **Bridge** — Guidance through faith transitions and spiritual crossroads
+  - **Bridge** — Live Farsi-English family translation that carries tone, warmth, and cultural context across languages
   - **Tutor** — Scripture study with historical and theological context
 - **Holy Pause** — Interrupt mid-response to interject your thoughts. Eliana yields gracefully.
 - **Text Fallback** — When live audio isn't available, seamless text chat with the same personality.
@@ -99,7 +99,7 @@ Connect the repo to Cloudflare Pages. Build command: `npm run build`, output dir
 ### Relay → Google Cloud Run
 
 ```bash
-gcloud builds submit --config=relay/cloudbuild.yaml
+gcloud builds submit --tag gcr.io/eliana-488603/eliana-relay
 ```
 
 Set secrets in Cloud Run:

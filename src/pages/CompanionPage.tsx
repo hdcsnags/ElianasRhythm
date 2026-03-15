@@ -16,8 +16,14 @@ import { getSession } from '../services/sessions'
 import { addMessage, getMaxSequenceIndex } from '../services/messages'
 import { liveService } from '../services/live'
 import { supabase } from '../lib/supabase/client'
-import type { Session } from '../lib/types'
+import type { Session, SessionMode } from '../lib/types'
 import type { LiveStreamEvent } from '../services/live'
+
+const MODE_OPTIONS: { value: SessionMode; label: string; icon: string }[] = [
+  { value: 'companion', label: 'Companion', icon: '🕊' },
+  { value: 'bridge', label: 'Bridge', icon: '🌉' },
+  { value: 'tutor', label: 'Tutor', icon: '📖' },
+]
 
 export default function CompanionPage() {
   const { sessionId } = useParams<{ sessionId?: string }>()
@@ -30,6 +36,7 @@ export default function CompanionPage() {
   const [partialText, setPartialText] = useState<string | undefined>()
   const [textSending, setTextSending] = useState(false)
   const [timer, setTimer] = useState(0)
+  const [mode, setMode] = useState<SessionMode>('companion')
 
   const { messages, loading: messagesLoading, sendMessage, appendMessage } = useMessages(session?.id)
   const handleLiveEvent = useCallback((event: LiveStreamEvent) => {
@@ -68,13 +75,14 @@ export default function CompanionPage() {
           const existing = await getSession(sessionId)
           if (existing) {
             setSession(existing)
+            if (existing.mode) setMode(existing.mode as SessionMode)
           } else {
-            const s = await startSession('companion')
+            const s = await startSession(mode)
             setSession(s)
             navigate(`/companion/${s.id}`, { replace: true })
           }
         } else {
-          const s = await startSession('companion')
+          const s = await startSession(mode)
           setSession(s)
           navigate(`/companion/${s.id}`, { replace: true })
         }
@@ -85,7 +93,7 @@ export default function CompanionPage() {
       }
     }
     if (user) loadOrCreate()
-  }, [sessionId, user]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [sessionId, user, mode]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleConnect = useCallback(() => {
     if (!session || !user) return
@@ -93,9 +101,9 @@ export default function CompanionPage() {
     live.connect({
       sessionId: session.id,
       userId: user.id,
-      mode: 'companion',
+      mode,
     })
-  }, [session, user, live])
+  }, [session, user, live, mode])
 
   const handleDisconnect = useCallback(async () => {
     live.disconnect()
@@ -190,11 +198,28 @@ export default function CompanionPage() {
         <StarField />
 
         <div className="absolute top-6 left-6 flex flex-col gap-1 z-10">
-          <div className="font-serif text-base text-cream font-normal">Companion Session</div>
+          <div className="font-serif text-base text-cream font-normal">{MODE_OPTIONS.find(m => m.value === mode)?.label ?? 'Companion'} Session</div>
           <div className="text-[0.7rem] text-cream/[0.28] tracking-wide">{user?.email}</div>
           {live.isActive && (
             <div className="font-display text-[0.65rem] text-gold tracking-[0.2em] mt-1">
               {formatTimer(timer)}
+            </div>
+          )}
+          {!live.isActive && (
+            <div className="flex gap-1.5 mt-2">
+              {MODE_OPTIONS.map(({ value, label }) => (
+                <button
+                  key={value}
+                  onClick={() => { if (value !== mode) { setMode(value); setSession(null); navigate('/companion', { replace: true }) } }}
+                  className={`px-2.5 py-1 text-[0.65rem] font-display tracking-[0.15em] uppercase border transition-colors ${
+                    value === mode
+                      ? 'border-gold/40 bg-gold/[0.12] text-gold'
+                      : 'border-gold/10 text-cream/30 hover:text-cream/60 hover:border-gold/20'
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
             </div>
           )}
         </div>
@@ -226,7 +251,7 @@ export default function CompanionPage() {
           <div className="font-display text-[0.6rem] tracking-[0.3em] text-gold uppercase">Transcript</div>
           <div className="text-[0.7rem] text-cream/[0.28] flex items-center gap-1.5">
             <div className="w-1.5 h-1.5 rounded-full bg-gold animate-mode-pulse" />
-            Companion
+            {MODE_OPTIONS.find(m => m.value === mode)?.label ?? 'Companion'}
           </div>
         </div>
 

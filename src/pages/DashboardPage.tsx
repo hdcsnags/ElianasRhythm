@@ -103,18 +103,18 @@ export default function DashboardPage() {
             <p className="text-sm text-cream/[0.28] leading-relaxed">Real-time voice conversation grounded in scripture. For the 2am moments when no one else is there.</p>
           </div>
 
-          <div className="p-8 border border-gold/10 bg-surface transition-all duration-300 hover:border-gold/30 hover:-translate-y-1 relative overflow-hidden group cursor-pointer" onClick={handleStartCompanion}>
-            <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-gold to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-            <div className="font-display text-[0.55rem] tracking-[0.3em] text-cream/[0.28] uppercase border border-cream/[0.28] px-2 py-0.5 inline-block mb-4">Prototype</div>
-            <Globe className="w-7 h-7 text-cream/20 mb-3" />
+          <div className="p-8 border border-gold/25 bg-gradient-to-br from-gold/[0.08] to-surface transition-all duration-300 hover:border-gold/40 hover:-translate-y-1 relative overflow-hidden group cursor-pointer" onClick={handleStartCompanion}>
+            <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-gold to-transparent" />
+            <div className="font-display text-[0.55rem] tracking-[0.3em] text-gold uppercase border border-gold px-2 py-0.5 inline-block mb-4">Live</div>
+            <Globe className="w-7 h-7 text-gold/60 mb-3" />
             <div className="font-serif text-[1.8rem] text-cream mb-2">Bridge</div>
             <p className="text-sm text-cream/[0.28] leading-relaxed">Live bilingual conversation. For families separated by language, not by love.</p>
           </div>
 
-          <div className="p-8 border border-gold/[0.05] bg-surface transition-all duration-300 hover:border-gold/20 hover:-translate-y-1 relative overflow-hidden group opacity-60">
-            <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-gold to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-            <div className="font-display text-[0.55rem] tracking-[0.3em] text-cream/[0.15] uppercase border border-cream/[0.15] px-2 py-0.5 inline-block mb-4">Soon</div>
-            <GraduationCap className="w-7 h-7 text-cream/10 mb-3" />
+          <div className="p-8 border border-gold/25 bg-gradient-to-br from-gold/[0.08] to-surface transition-all duration-300 hover:border-gold/40 hover:-translate-y-1 relative overflow-hidden group cursor-pointer" onClick={handleStartCompanion}>
+            <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-gold to-transparent" />
+            <div className="font-display text-[0.55rem] tracking-[0.3em] text-gold uppercase border border-gold px-2 py-0.5 inline-block mb-4">Live</div>
+            <GraduationCap className="w-7 h-7 text-gold/60 mb-3" />
             <div className="font-serif text-[1.8rem] text-cream mb-2">Tutor</div>
             <p className="text-sm text-cream/[0.28] leading-relaxed">Original language scripture study. Learn hesed, tikvah, agape as living words.</p>
           </div>

@@ -1,5 +1,4 @@
-// TODO [Phase 2]: Wire these interfaces to the actual live provider (e.g., Gemini Live API)
-// All types here represent the contract for the relay WebSocket protocol
+// Live service types — contract for the relay WebSocket protocol
 
 export type LiveSessionState =
   | 'idle'
@@ -14,7 +13,6 @@ export interface LiveSessionConfig {
   sessionId: string
   userId: string
   mode: 'companion' | 'bridge' | 'tutor'
-  // TODO [Phase 2]: Add persona config, language settings, safety params
 }
 
 export interface LiveStreamEvent {
@@ -65,9 +63,6 @@ export interface FallbackEvent {
   timestamp: number
 }
 
-// TODO [Phase 2]: Interruption / VAD logic
-// When VAD detects speech while assistant is speaking, emit interruption event
-// Frontend should pause playback and resume listening
 export interface InterruptionEvent {
   type: 'interruption'
   payload: { at_ms: number }

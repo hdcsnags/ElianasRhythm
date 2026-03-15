@@ -86,7 +86,6 @@ function PrivacyTab() {
         <p className="text-xs text-cream/[0.28]">
           Preferences for how scripture references and original language terms are displayed.
         </p>
-        <p className="text-xs text-cream/[0.15] italic">Coming in Phase 2</p>
       </div>
 
       <div className="border border-gold/[0.08] bg-surface p-6 space-y-3">

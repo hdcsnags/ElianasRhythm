@@ -35,15 +35,15 @@ export function LandingModes({ onExperience }: LandingModesProps) {
         </div>
 
         <div
-          className="reveal p-10 bg-surface border border-gold/10 relative overflow-hidden transition-all duration-300 hover:border-gold/30 hover:-translate-y-[3px] cursor-pointer group"
-          style={{ transitionDelay: '0.15s' }}
+          className="reveal p-10 border border-gold/25 relative overflow-hidden transition-all duration-300 hover:border-gold/40 hover:-translate-y-[3px] cursor-pointer group"
+          style={{ transitionDelay: '0.15s', background: 'linear-gradient(135deg, rgba(201,168,76,0.08) 0%, #1A1A2A 100%)' }}
           onClick={onExperience}
         >
-          <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-gold to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-          <div className="font-display text-[0.55rem] tracking-[0.3em] text-cream/30 uppercase border border-cream/30 px-3 py-1 inline-block mb-6">
-            Prototype
+          <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-gold to-transparent" />
+          <div className="font-display text-[0.55rem] tracking-[0.3em] text-gold uppercase border border-gold px-3 py-1 inline-block mb-6">
+            Live
           </div>
-          <Globe className="w-7 h-7 text-cream/20 mb-4" />
+          <Globe className="w-7 h-7 text-gold/60 mb-4" />
           <div className="font-serif text-[1.8rem] text-cream mb-3">Bridge</div>
           <p className="text-[0.9rem] leading-[1.7] text-cream/30">
             Live bilingual conversation. Farsi &#8596; English. For families separated by language, not by love.
@@ -51,14 +51,15 @@ export function LandingModes({ onExperience }: LandingModesProps) {
         </div>
 
         <div
-          className="reveal p-10 bg-surface border border-gold/[0.05] relative overflow-hidden transition-all duration-300 hover:border-gold/20 hover:-translate-y-[3px] group opacity-60"
-          style={{ transitionDelay: '0.3s' }}
+          className="reveal p-10 border border-gold/25 relative overflow-hidden transition-all duration-300 hover:border-gold/40 hover:-translate-y-[3px] cursor-pointer group"
+          style={{ transitionDelay: '0.3s', background: 'linear-gradient(135deg, rgba(201,168,76,0.08) 0%, #1A1A2A 100%)' }}
+          onClick={onExperience}
         >
-          <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-gold to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-          <div className="font-display text-[0.55rem] tracking-[0.3em] text-cream/20 uppercase border border-cream/20 px-3 py-1 inline-block mb-6">
-            Soon
+          <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-gold to-transparent" />
+          <div className="font-display text-[0.55rem] tracking-[0.3em] text-gold uppercase border border-gold px-3 py-1 inline-block mb-6">
+            Live
           </div>
-          <GraduationCap className="w-7 h-7 text-cream/10 mb-4" />
+          <GraduationCap className="w-7 h-7 text-gold/60 mb-4" />
           <div className="font-serif text-[1.8rem] text-cream mb-3">Tutor</div>
           <p className="text-[0.9rem] leading-[1.7] text-cream/30">
             Original language scripture study. Learn hesed, tikvah, agape as living words — not translations.

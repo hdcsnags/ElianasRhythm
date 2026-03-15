@@ -70,7 +70,7 @@ export function CompanionSettings({ profile, onSave }: CompanionSettingsProps) {
             <p className="text-xs text-cream/[0.28] mt-0.5 max-w-sm">
               Allows a moment of intentional silence before Eliana responds.
             </p>
-            <p className="text-xs text-gold/50 mt-1">Behavior tuning coming in Phase 2</p>
+            <p className="text-xs text-cream/[0.28] mt-1">Eliana will honor a moment of silence before responding.</p>
           </div>
           <button
             role="switch"

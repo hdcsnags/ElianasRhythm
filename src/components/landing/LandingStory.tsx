@@ -23,10 +23,15 @@ export function LandingStory() {
           </div>
         </div>
         <div className="reveal" style={{ transitionDelay: '0.2s' }}>
-          <div className="pull-quote font-serif italic text-cream border-l-2 border-gold pl-8" style={{ fontSize: 'clamp(1.4rem, 3vw, 2rem)', lineHeight: '1.5' }}>
-            Where sin costs ten dollars, grace has already paid one million. That is the God Eliana knows.
+          <div className="pull-quote border-l-2 border-gold pl-8">
+            <div className="font-serif italic text-cream" style={{ fontSize: 'clamp(1.4rem, 3vw, 2rem)', lineHeight: '1.5' }}>
+              But where sin increased, grace overflowed beyond all measure.
+            </div>
+            <p className="text-[0.9rem] leading-[1.7] text-cream/60 mt-6 not-italic">
+              The Greek word here is hyperperisseu&#x14D; (&#x1F51;&#x3C0;&#x3B5;&#x3C1;&#x3B5;&#x3C0;&#x3B5;&#x3C1;&#x3AF;&#x3C3;&#x3C3;&#x3B5;&#x3C5;&#x3C3;&#x3B5;&#x3BD;) — hyper meaning "beyond," perissos meaning "exceedingly abundant." This isn't grace that merely matches sin. It's grace that makes the math stop working. Paul chose a word so extreme it barely existed in Greek literature — because ordinary language couldn't carry what God did.
+            </p>
             <div className="font-display text-[0.6rem] tracking-[0.2em] text-gold mt-6 not-italic uppercase">
-              Hyperperisseuo — Romans 5:20
+              ὑπερεπερίσσευσεν · Romans 5:20
             </div>
           </div>
         </div>

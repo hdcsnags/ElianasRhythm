@@ -6,6 +6,7 @@ import { TranscriptPanel } from '../components/companion/TranscriptPanel'
 import { StarField } from '../components/companion/StarField'
 import { Waveform } from '../components/companion/Waveform'
 import { ScripturePeek } from '../components/companion/ScripturePeek'
+import { MessageSquare } from 'lucide-react'
 
 import { LoadingSpinner } from '../components/ui/LoadingSpinner'
 import { useLive } from '../hooks/useLive'
@@ -37,6 +38,7 @@ export default function CompanionPage() {
   const [textSending, setTextSending] = useState(false)
   const [timer, setTimer] = useState(0)
   const [mode, setMode] = useState<SessionMode>('companion')
+  const [showTranscript, setShowTranscript] = useState(false)
 
   const { messages, loading: messagesLoading, sendMessage, appendMessage } = useMessages(session?.id)
   const handleLiveEvent = useCallback((event: LiveStreamEvent) => {
@@ -190,7 +192,7 @@ export default function CompanionPage() {
   const isThinking = live.state === 'paused' || live.state === 'connecting'
 
   return (
-    <div className="h-full grid grid-cols-1 lg:grid-cols-[1fr_340px]">
+    <div className={`h-full grid grid-cols-1 ${showTranscript ? 'lg:grid-cols-[1fr_340px]' : ''}`}>
       <div className="relative flex flex-col items-center justify-center overflow-hidden bg-night">
         <div className="absolute inset-0 pointer-events-none" style={{
           background: 'radial-gradient(ellipse 70% 60% at 50% 45%, rgba(201,168,76,0.045) 0%, transparent 65%), radial-gradient(ellipse 40% 40% at 20% 80%, rgba(100,60,20,0.06) 0%, transparent 55%), radial-gradient(ellipse 30% 30% at 80% 15%, rgba(201,168,76,0.025) 0%, transparent 50%)'
@@ -244,9 +246,16 @@ export default function CompanionPage() {
             onHolyPause={live.triggerHolyPause}
           />
         </div>
+        <button
+          onClick={() => setShowTranscript(prev => !prev)}
+          className="absolute top-6 right-6 z-10 w-10 h-10 flex items-center justify-center border border-gold/20 bg-gold/[0.08] text-gold/60 hover:text-gold hover:border-gold/40 transition-colors"
+          title={showTranscript ? 'Hide transcript' : 'Show transcript'}
+        >
+          <MessageSquare className="w-4 h-4" />
+        </button>
       </div>
 
-      <aside className="hidden lg:flex flex-col bg-deep border-l border-gold/[0.08] overflow-hidden">
+      {showTranscript && <aside className="hidden lg:flex flex-col bg-deep border-l border-gold/[0.08] overflow-hidden">
         <div className="px-6 py-5 border-b border-gold/[0.08] flex items-center justify-between shrink-0">
           <div className="font-display text-[0.6rem] tracking-[0.3em] text-gold uppercase">Transcript</div>
           <div className="text-[0.7rem] text-cream/[0.28] flex items-center gap-1.5">
@@ -274,7 +283,7 @@ export default function CompanionPage() {
             </p>
           )}
         </div>
-      </aside>
+      </aside>}
     </div>
   )
 }

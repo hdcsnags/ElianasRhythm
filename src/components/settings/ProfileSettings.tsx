@@ -69,6 +69,7 @@ export function ProfileSettings({ profile, onSave }: ProfileSettingsProps) {
             <option value="de">German</option>
             <option value="zh">Chinese</option>
             <option value="ar">Arabic</option>
+            <option value="fa">Farsi (Persian)</option>
             <option value="sw">Swahili</option>
           </select>
         </div>
@@ -90,6 +91,7 @@ export function ProfileSettings({ profile, onSave }: ProfileSettingsProps) {
             <option value="de">German</option>
             <option value="zh">Chinese</option>
             <option value="ar">Arabic</option>
+            <option value="fa">Farsi (Persian)</option>
             <option value="sw">Swahili</option>
           </select>
         </div>

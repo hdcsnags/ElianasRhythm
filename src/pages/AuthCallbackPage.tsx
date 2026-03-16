@@ -6,20 +6,29 @@ export default function AuthCallbackPage() {
   const navigate = useNavigate()
 
   useEffect(() => {
-    const hash = window.location.hash
-    if (hash && hash.includes('access_token')) {
-      supabase.auth.getSession().then(({ data: { session } }) => {
-        if (session) {
-          window.history.replaceState(null, '', window.location.pathname)
-          navigate('/companion', { replace: true })
-        } else {
-          navigate('/auth', { replace: true })
-        }
-      })
-    } else {
-      supabase.auth.getSession().then(({ data: { session } }) => {
-        navigate(session ? '/companion' : '/auth', { replace: true })
-      })
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' && session) {
+        window.history.replaceState(null, '', window.location.pathname)
+        navigate('/companion', { replace: true })
+      }
+    })
+
+    // If the session is already established (e.g. page refresh), handle it immediately
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        window.history.replaceState(null, '', window.location.pathname)
+        navigate('/companion', { replace: true })
+      }
+    })
+
+    // Fallback: if nothing fires within 10s, send back to auth
+    const timeout = setTimeout(() => {
+      navigate('/auth', { replace: true })
+    }, 10000)
+
+    return () => {
+      subscription.unsubscribe()
+      clearTimeout(timeout)
     }
   }, [navigate])
 

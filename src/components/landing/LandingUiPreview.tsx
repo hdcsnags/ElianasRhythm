@@ -50,10 +50,10 @@ export function LandingUiPreview() {
 
             <div className="w-full max-w-[480px] flex flex-col gap-3">
               <div className="px-5 py-4 bg-cream/[0.05] border border-cream/[0.08] text-[0.88rem] leading-relaxed text-cream/60 self-end max-w-[85%] text-right">
-                I don't know if God is even real anymore.
+                I've been feeling really lost lately.
               </div>
               <div className="px-5 py-4 bg-gold/[0.07] border border-gold/[0.12] text-cream font-serif text-base leading-relaxed self-start max-w-[85%]">
-                That doubt has weight to it. I'm not going anywhere. Tell me more.
+                That sounds heavy. I'm here with you. Tell me what's been weighing on your heart.
               </div>
             </div>
 

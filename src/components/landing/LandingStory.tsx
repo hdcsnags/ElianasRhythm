@@ -25,13 +25,16 @@ export function LandingStory() {
         <div className="reveal" style={{ transitionDelay: '0.2s' }}>
           <div className="pull-quote border-l-2 border-gold pl-8">
             <div className="font-serif italic text-cream" style={{ fontSize: 'clamp(1.4rem, 3vw, 2rem)', lineHeight: '1.5' }}>
-              But where sin increased, grace overflowed beyond all measure.
+              Before they call I will answer; while they are still speaking I will hear.
             </div>
-            <p className="text-[0.9rem] leading-[1.7] text-cream/60 mt-6 not-italic">
-              The Greek word here is hyperperisseu&#x14D; (&#x1F51;&#x3C0;&#x3B5;&#x3C1;&#x3B5;&#x3C0;&#x3B5;&#x3C1;&#x3AF;&#x3C3;&#x3C3;&#x3B5;&#x3C5;&#x3C3;&#x3B5;&#x3BD;) — hyper meaning "beyond," perissos meaning "exceedingly abundant." This isn't grace that merely matches sin. It's grace that makes the math stop working. Paul chose a word so extreme it barely existed in Greek literature — because ordinary language couldn't carry what God did.
+            <div className="font-serif text-cream/60 text-[1.3rem] mt-6 not-italic" dir="rtl">
+              בְּטֶרֶם יִקְרָאוּ וַאֲנִי אֶעֱנֶה
+            </div>
+            <p className="text-[0.85rem] text-cream/40 mt-2 not-italic italic">
+              b'terem yikre'u va'ani e'eneh
             </p>
             <div className="font-display text-[0.6rem] tracking-[0.2em] text-gold mt-6 not-italic uppercase">
-              ὑπερεπερίσσευσεν · Romans 5:20
+              Isaiah 65:24
             </div>
           </div>
         </div>
